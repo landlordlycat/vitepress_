@@ -290,7 +290,7 @@ NOT 或者 !
 
 **_将一列的数据作为一个整体，进行纵向计算_**
 
-```mysql
+```sql
 count，max，min，avg，sum
 SELECT 聚合函数（字段列表）FROM 表名;
 ```
