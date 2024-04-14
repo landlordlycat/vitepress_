@@ -22,8 +22,8 @@ onMounted(async()=>{
 
 <div :class="$style.yiyan">
 <span>一言</span>
-<span> {{yiyan.hitokoto ?? '接口请求失败，请稍后再重试~'}}</span>
-
+<span> {{yiyan.hitokoto ?? '接口请求失败，请稍后再重试~'}} --{{yiyan.from ?? ''}}
+</span>
 <button :class="$style.button" @click="getYiyan">下一条</button>
 
 </div>
