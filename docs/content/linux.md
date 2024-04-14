@@ -481,6 +481,36 @@ drwxr-xr-x：
 - 用户和用户组可以用用户名或用户组名，不指定，表示不修改
 - `：`用于分割用户和用户组
 
+示例：
+
+- `chown root hello.txt`将 hello 文件所属用户修改为 root
+- `chown :root hello.txt`将 hello 文件所属用户组修改为 root
+- `chown root:root hello.txt`将 hello 文件所属用户和用户组修改为 root
+- `chown -R root test`递归修改 test 文件夹及其子目录下的文件或文件夹的所属用户和用户组为 root
+
+## 各类小技巧快捷键
+
+- 强制停止 `ctrl+c`
+- 退出或登出 `ctrl+d || exit`
+- 历史命令搜索 `history || !命令前缀 || ctrl+r` 自动执行上一次匹配的命令
+- 光标移动 `ctrl+a（跳到命令开头） || ctrl+e（跳到命令结尾） || ctrl+键盘左键（向左跳一个单词） || ctrl+右键 （向右跳一个单词） || ctrl+u（删除光标前面的所有字符） || ctrl+k（删除光标后面的所有字符） || ctrl+w（删除光标前面的一个单词） || ctrl+y（粘贴刚刚删除的字符）`
+- 清屏 `ctrl+l || clear`
+
+## 软件安装
+
+> yum:RPM 包软件管理器，用于自动化安装配置 linux 软件，并可以自动解决依赖问题
+> 语法：`yum [-y] [install|remove|search] 软件名称`
+
+- 选项：-y 自动回答 yes，不提示
+- install 安装软件
+- remove 卸载软件
+- search 搜索软件
+
+:::tip 提示
+yum 命令需要 root 权限，可以 su 切换到 root，或者 sudo 提权
+yum 需要联网
+:::
+
 ## 压缩和解压命令
 
 ### 压缩命令
