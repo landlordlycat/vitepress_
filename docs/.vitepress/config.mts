@@ -58,10 +58,7 @@ export default defineConfig({
     sidebar: [
       {
         text: '简介',
-        items: [
-          { text: 'Markdown', link: '/markdown-examples' },
-          { text: 'Runtime API', link: '/api-examples' }
-        ]
+        items: [{ text: 'profile', link: '/profile' }]
       },
       {
         text: '前端',

@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: Quickstart
-      link: /markdown-examples
+      link: /profile
 # features:
 #   - icon:
 #     title: Simple and minimal, always
