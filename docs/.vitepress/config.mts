@@ -12,6 +12,11 @@ export default defineConfig({
   ],
   cleanUrls: true,
   lastUpdated: true,
+  markdown: {
+    image: {
+      lazyLoading: true
+    }
+  },
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     logo: '/logo.jpg',
