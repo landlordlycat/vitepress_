@@ -499,7 +499,7 @@ drwxr-xr-x：
 ## 软件安装
 
 > yum:RPM 包软件管理器，用于自动化安装配置 linux 软件，并可以自动解决依赖问题
-> 语法：`yum [-y] [install|remove|search] 软件名称`
+> 语法：`yum（apt ubuntu） [-y] [install|remove|search] 软件名称`
 
 - 选项：-y 自动回答 yes，不提示
 - install 安装软件
@@ -508,33 +508,72 @@ drwxr-xr-x：
 
 :::tip 提示
 yum 命令需要 root 权限，可以 su 切换到 root，或者 sudo 提权
-yum 需要联网
+yum 是需要联网的
 :::
 
-## 压缩和解压命令
+## systemctl
 
-### 压缩命令
+> linux 系统很多软件都支持 systemctl 命令控制
 
-- tar：打包压缩文件
-- gzip：压缩文件
-- bzip2：压缩文件
+语法：`systemctl start | stop | status | enable | disable 服务名`
 
-语法：`tar [-cvf] 打包后的文件名 被打包的文件或目录`
+- start 启动
+- stop 关闭
+- status 查看状态
+- enable 开机自启
+- disable 关闭开机自启
 
-- -c 选项，表示创建打包文件
-- -v 选项，表示显示详细信息
-- -f 选项，表示指定打包后的文件名
+系统内置的服务比如：
+
+- networkmanager，主网络服务
+- network，福网络服务
+- firewalld，防火墙服务
+- sshd,ssh 服务
+
+## 软连接
+
+> 在系统中创建软连接，可以将文件，文件夹链接到其它位置（类似 win 的快捷方式）
+
+语法： `ln -s 参数1 参数2`
+
+- -s 选项，创建软连接
+- 参数 1：被链接的文件或文件夹
+- 参数 2：要链接去的目的地
+
+## 日期和时区
+
+date 命令可以在命令行中查看系统时间
+
+语法：`date [-d] [+格式化字符串]`
+
+- -d 选项，指定时间
+- - 选项，指定格式化字符串
+- 格式化字符串：`%Y-%m-%d %H:%M:%S:%s`
 
 ```shell
-# 压缩文件
-tar -cvf test.tar test.txt
-
-# 压缩文件夹
-tar -cvf test.tar test
+date "+%Y-%m-%d %H:%M:%S"
 ```
 
-### 解压命令
+示例：`date -d "+1 day"` (日期加减支持的时间标记为：year 年，month 月，day 天，hour 小时，minute 分钟，second 秒)
 
-- tar：解压文件
-- gzip：解压文件
-- bzip2：解压文件
+修改 linux 时区
+
+使用 root 权限，执行以下命令，修改时区为东八区
+
+```shell
+rm -f /etc/localtime
+sudo ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+```
+
+ntp 程序
+
+> 我们可以通过 ntp 自动校准时间
+
+安装 `ntp：yum（apt） -y install ntp`
+
+启动并设置开机自启
+
+- systemctl start ntpd
+- systemctl enable ntpd
+
+手动校准：`ntpdate -u ntp.aliyun.com`
