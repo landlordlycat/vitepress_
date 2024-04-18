@@ -753,3 +753,8 @@ echo $PATH
 - 并通过语法：`source .bashrc`配置文件，进行立刻生效，或重新登录 finalshell 生效
 
 ## 上传，下载
+
+rz,sz 命令可以上传和下载文件 通过`yum -y install lrzsz`安装
+
+- rz 命令，进行上传，语法：直接输入 `rz` 即可
+- sz 命令 ，进行下载，语法：直接输入 `sz 文件名` 即可
