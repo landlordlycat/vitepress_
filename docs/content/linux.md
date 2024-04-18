@@ -832,3 +832,5 @@ tar 的常见组合为：
 
 - `unzip test.zip` 将 test.zip 解压到当前目录
 - `unzip test.zip -d /home/itheima` 将 test.zip 解压到 itheima 目录
+
+## 未完待续 - 软件安装
