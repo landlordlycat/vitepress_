@@ -577,3 +577,146 @@ ntp 程序
 - systemctl enable ntpd
 
 手动校准：`ntpdate -u ntp.aliyun.com`
+
+## ip 地址，主机名
+
+ip 命令可以在命令行中查看系统 ip 地址
+
+可以通过命令：`ifconfig`,安装`net tools`，然后执行 `ifconfig` 命令
+
+### 特殊 ip 地址
+
+- 127.0.0.1，指代本机
+- 0.0.0.0，特殊 ip 地址
+  - 可以用于指代本机
+  - 可以在端口绑定中用来确定绑定关系
+  - 在一些 ip 限制中，表所有 ip 的意思，如放行规则设置为 0.0.0.0,表示允许任意 ip 访问
+
+### 主机名
+
+- `hostname查看主机名`
+- `hostnamectl set-hostname 主机名` 设置主机名
+
+### 域名解析
+
+![域名解析](/assets/images/域名解析.png)
+
+### 固定 ip
+
+> DHCP：动态获取 ip 地址，每次重启设备都会获取一次
+
+[VWware 虚拟机配置固定 ip](https://blog.csdn.net/m0_60607927/article/details/137416986)
+
+## 网络请求和下载
+
+### ping 命令
+
+> ping 命令可以在命令行中查看网络状态
+
+语法：`ping [-c num] ip或者主机名`
+
+- -c 选项，指定发送次数
+- 参数：ip 或主机名
+
+### wget 命令
+
+> wget 命令可以在命令行中下载文件
+
+语法：`wget [-b] url`
+
+- -b,后台下载，会将日志下入当前工作目录的 wget-log 文件（`tail -f wget-log` 查看下载进度）
+- 参数：url 下载地址
+
+### curl 命令
+
+> curl 发送 http 网络请求 命令可以在命令行中下载文件，获取信息
+
+语法：`curl [-O] url`
+
+- -O 选项，用于下载使用
+
+- 参数：url 下载地址
+
+示例：`curl -O https://cdn.itheima.net/README.md`
+
+示例：`curl cip.cc`
+
+## 网络传输
+
+查看端口占用
+
+- 使用 nmap 命令，安装`yum -y install nmap`
+
+语法：`nmap 被查看的ip地址`
+
+- 也可以使用 netstat 命令，查看指定端口的占用情况
+
+语法：`netstat -anp | grep 端口号`,安装`yum -y install net-tools`
+
+## 进程管理
+
+可以通过 ps 命令查看 linux 系统中的进程信息
+
+语法：`ps [-e -f]`
+
+- e,显示全部的进程
+- f,以完全格式化的形式展示信息
+  一般来说，固定用法：`ps -ef` 列出全部进程的全部信息
+
+- UID：进程所属的用户 id
+- PID：进程 id
+- PPID：父进程 id
+- C：进程使用的 cpu（占用率%）
+- STIME：进程的启动时间
+- TTY: 启动此进程的终端序号，如显示？，表示非终端启动
+- STAT：进程状态
+- TIME: 进程使用的时间
+- CMD：进程的命令（执行的程序名称）
+
+### 查看指定进程
+
+- 在 finalshell 中，执行命令：tail，可以查看指定进程的日志
+
+```shell
+ps -ef | grep tail
+```
+
+### 关闭进程
+
+语法：`kill [-9] 进程id`
+
+- -9 选项，强制关闭进程
+
+## 主机状态
+
+### 查看系统资源占用
+
+- 可以通过`top`命令查看 cpu，内存使用情况
+
+![top](./assets/images/top命令内容详解1.png)
+
+![top](./assets/images/top命令内容详解2.png)
+
+top 命令选项：
+
+- -p 只显示某个进程的信息
+- -d 设置刷新时间，默认 5s
+- -c 显示产生进程的完整命令
+- -n 指定刷新次数，比如`top -n 3`刷新 3 次
+- -b 以非交互式全屏模式运行,以批次的方式执行 top，一般配合-n 指定输出几次统计信息，将输出重定向到指定文件，比如`top -b -n 3 > /temp/top.tmp`
+- -i 不显示任何闲置(idle)或无用(zombie)的进程
+- -u 查找特定用户启动的进程，比如`top -u root`查找 root 用户启动的进程
+
+### 磁盘信息监控
+
+- 使用 df 命令，可以查看硬盘的使用情况
+- iostat 命令可以查看 cpu,磁盘的使用情况
+
+语法：`df [-h]`
+
+- -h 选项，以带单位的方式显示
+
+语法：`iostat [-x] [num1] [num2]`
+
+- -x,显示更多信息
+- num1：数字，刷新间隔，num2：数字，刷新几次
