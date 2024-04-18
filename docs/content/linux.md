@@ -758,3 +758,77 @@ rz,sz 命令可以上传和下载文件 通过`yum -y install lrzsz`安装
 
 - rz 命令，进行上传，语法：直接输入 `rz` 即可
 - sz 命令 ，进行下载，语法：直接输入 `sz 文件名` 即可
+
+## 压缩 解压
+
+### tar 压缩
+
+- .tar 称为 tarball,归档文件,简单的封装，体积并没有减少
+- .gz 使用了压缩算法，极大的减少压缩后的体积
+
+语法：`tar [-c -v -x -f -z -C]参数1 参数2 ....参数N`
+
+- -c,创建压缩文件，用于压缩模式
+- -v,显示压缩，解压过程，用于查看进度
+- -x,解压模式
+- -f,要创建的文件，或要解压的文件，-f 选项必须在所有选项中位置处于最后一个
+- -z,gzip 模式，不适用-z 就是普通的 tarball 格式
+- -C,选择解压的目的地，用于解压模式
+
+tar 的常见组合为：
+
+- `tar -cvf test.tar 1.txt 2.txt`
+- `tar -zcvf test.tar.gz 1.txt 2.txt`
+
+:::tip 注意：
+
+- -z 选项如果使用的话，一般处于选项位第一个
+- -f 选项，**必须**在选项位的最后一个
+  :::
+
+### tar 解压
+
+常用的 tar 解压组合有
+
+- `tar -xvf test.tar`
+
+解压 test.tar，将文件解压到当前目录
+
+- `tar -xvf test.tar -C /home/itheima`
+
+- `tar -zxvf test.tar.gz -C /home/itheima`
+
+:::warning 注意：
+
+- -z 选项如果使用的话，一般处于选项位第一个
+- -f 选项，**必须**在选项位的最后一个
+- -C 选项单独使用，和解压所需的其它参数分开
+  :::
+
+### zip 命令压缩文件
+
+可以使用 zip 命令，压缩文件位 zip 压缩包
+
+语法：`zip [-r] 参数1 参数2 ...参数N`
+
+- -r,被压缩的包含文件夹的时候，需要使用-r 选项，和 rm，cp 等命令的-r 效果一致，递归。
+
+示例：
+
+- `zip test.zip a.txt b.txt`
+- `zip -r test.zip test itheima a.txt`
+  （将 test,itheima 两个文件夹和 a 文件，压缩）
+
+### unzip 命令解压文件
+
+可以使用 unzip 命令，解压文件位 zip 压缩包
+
+语法：`unzip [-d] 参数1 参数2 ...参数N`
+
+- -d,指定要解压去的位置，同 tar 的-C 选项
+- 参数，被解压的 zip 压缩包文件
+
+示例：
+
+- `unzip test.zip` 将 test.zip 解压到当前目录
+- `unzip test.zip -d /home/itheima` 将 test.zip 解压到 itheima 目录
