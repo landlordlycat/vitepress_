@@ -788,3 +788,295 @@ show engines;查询当前数据库支持的引擎
 xxx.ibd `表名.ibd`存储该表的表结构(frm,sdi),数据和索引
 
 ## 存储引擎选择
+
+默认使用 innodb 存储引擎，支持事务，支持行级锁，支持外键。
+
+1. MyISAM 存储引擎：不支持事务，不支持外键，适合于==大数据量==的读写操作。
+
+2. InnoDB 存储引擎：支持事务，支持外键，适合于==小数据量==的读写操作。
+
+3. MEMORY 存储引擎：不支持事务，不支持外键，适合于==小数据量==的读写操作。
+
+4. CSV 存储引擎：不支持事务，不支持外键，适合于==大数据量==的读写操作。
+
+5. ARCHIVE 存储引擎：不支持事务，不支持外键，适合于==大数据量==的读写操作。
+
+6. PERFORMANCE_SCHEMA 存储引擎：不支持事务，不支持外键，用于性能分析。
+
+7. FEDERATED 存储引擎：不支持事务，不支持外键，用于联合查询
+
+## 索引
+
+> 索引是数据库系统中一个重要的概念，它是为了提高数据查询效率的一种**数据结构(有序)**，它是一个数据表里的**列或者多个列**，通过索引列的排序，快速定位数据记录的位置。
+
+### 索引结构
+
+| 索引结构            | 描述                                                                             |
+| :------------------ | :------------------------------------------------------------------------------- |
+| B+tree 索引         | 常见的索引类型，大部分引擎支持                                                   |
+| Hash 索引           | 底层数据结构是用哈希表实现的，只有景区匹配索引列的查询才有效，不支持范围查询     |
+| R-tree（空间索引）  | 空间索引是 MyISAM 引擎的一个特殊索引类型，主要用于地理空间数据类型，通常使用较少 |
+| full-text(全文索引) | 是一种通过建立倒排索引，快速匹配文档的方式。类似于 Lucene,Solr,ES                |
+
+二叉树结构
+
+- 二叉树缺点：二叉树缺点：顺序插入时，会形成一个链表，查询性能大大降低。大数据量情况下，层级较深，检索速度慢。
+- 红黑树：大数据量情况下，层级较深，检索速度慢。
+
+B-Tree(多路平衡查找树)
+
+> 以一颗最大度数(max-degree)为 5(5 阶)的 b-tree 为例每个节点最多存储 4 个 key,5 个指针
+
+:::tip
+树的度数指的是一个节点的子节点个数。5 阶为例子，每个节点最多存储 4 个 key,5 个指针，5 个子节点
+:::
+
+![b+tree](/assets/images/B+tree.png 'b+tree')
+
+相对于 B-Tree 区别：
+
+1. 所有的数据都会出现在叶子节点
+2. 叶子节点形成一个单向链表
+
+> MySQL 索引数据结构对经典的 B+Tree 进行了优化。在原 B+Tree 的基础上，增加一个指向相邻叶子节点的链表指针，就形成了带有顺序指针的 B+Tree,提高区间访问的性能。
+
+:::info 思考：
+为什么 InnoDB 存储引擎选择使用 B+tree 索引结构？
+
+1. 相对于二叉树，层级更少，搜索效率高；
+2. 对于 B-tree,无论是叶子节点还是非叶子节点，都会保存数据，这样导致一页中存储的键值减少，指针跟着减少，要同样保存大量数据，只能增加树的高度，导致性能降低；
+3. 相对 Hash 索引，B+tree 支持范围匹配及排序操作；
+   :::
+
+聚集索引和二级索引
+
+- 聚集索引：聚集索引就是数据行的物理顺序与键值的逻辑顺序相同，一个表只能有一个聚集索引，一个表只能有一个聚集索引。
+
+- 二级索引：二级索引是一种索引结构，它可以在一个索引上建立索引，而不是直接在表上建立索引。
+
+1. 聚集索引：聚集索引的叶子节点存放的就是数据，通过主键索引查找数据，效率最高。
+2. 二级索引：二级索引是索引结构，它可以在一个索引上建立索引，而不是直接在表上建立索引。
+
+### 索引类型
+
+- 主键索引：主键索引是一种特殊的索引，主键索引的唯一性保证了表中每一行数据的唯一性。
+- 唯一索引：唯一索引是一种非聚集索引，它可以保证数据唯一性。
+- 外键索引：外键索引是一种非聚集索引，它可以保证外键的正确性，外键是指被引用表中的关联列，可以保证外键的正确性。
+- 普通索引：普通索引是一种聚集索引，它可以提高查询效率。
+- 聚簇索引：聚簇索引是一种聚集索引，它可以提高查询效率。
+
+### 索引选择
+
+- 选择唯一索引：唯一索引的唯一性保证了表中每一行数据的唯一性，可以作为主键索引，也可以作为唯一索引。
+- 选择普通索引：普通索引是一种聚集索引，它可以提高查询效率。
+- 选择聚簇索引：聚簇索引是一种聚集索引，它可以提高查询效率。
+- 选择复合索引：复合索引是一种多列索引，可以提高查询效率。
+- 选择前缀索引：前缀索引是一种索引，它可以提高查询效率。
+- 选择覆盖索引：覆盖索引是一种索引，它可以减少查询的次数。
+- 选择索引列顺序：索引列的顺序可以提高查询效率。
+- 选择索引列数据类型：索引列的数据类型可以提高查询效率。
+- 选择索引列的存储长度：索引列的存储长度可以提高查询效率。
+- 选择索引列的分布：索引列的分布可以提高查询效率。
+
+### 索引语法
+
+创建索引
+
+```sql
+CREATE [UNIQUE|FULLTEXT] INDEX index_name ON table_name (index_column_name,...);
+```
+
+查看索引
+
+```sql
+SHOW INDEX FROM table_name;
+```
+
+删除索引
+
+```sql
+DROP INDEX index_name ON table_name;
+```
+
+### sql 性能分析
+
+sql 执行频率
+
+```sql
+SHOW GLOBAL STATUS LIKE 'Com_______'
+```
+
+#### 慢查询日志
+
+> 慢查询日志记录了所有执行时间超过指定参数(long*query*.time,单位：秒，默认 10 秒)的所有 SQL 语句的日志。 MySQL 的慢查询日志默认没有开启，需要在 MySQL 的配置文件(/etc/my.cnf)中配置如下信息：
+
+\#查看 mysql 慢日志查询开关 <br>
+`show variables like 'slow_query_log';`
+<br>
+\#开启 mysql 慢日志查询开关
+
+```sql
+slow_query_log = 1
+```
+
+\#设置 mysql 慢日志查询时间
+
+```sql
+long_query_time = 10
+```
+
+配置完毕之后，通过以下指令重新启动 MySQL 服务器进行测试，查看慢日志文件中记录的信息/var/lib/mysql/localhost-slow.log
+
+#### profile 详情
+
+> show profiles 能够在做 SQL 优化时帮助我们了解时间都耗费到哪里去了。通过 nave profiling 参数，能够看到当前 MySQL 是否支持
+
+```sql
+select @@have_profiling;
+```
+
+默认是关闭的，可以通过 set 语句在 session/global 级别开启，如：
+
+```sql
+set profiling = 1;
+```
+
+\# 查看每一条 sql 的耗时情况
+
+```sql
+show profiles;
+```
+
+\#查看指定 query id 的 SQL 语句各个阶段的耗时情况
+
+```sql
+show profile for query query_id;
+```
+
+\#查看指定 query id 的 SQL 语句 CPU 的使用情况
+
+```sql
+show profile cpu for query query_id;
+```
+
+#### explain 执行计划
+
+> EXPLAIN 或者 DESC 命令获取 MySQL 如何执行 SELECT 语句的信息，包括在 SELECT 语句执行过程中表如何连接和连接的顺序。
+
+```sql
+#直接在select语句之前加上关键字explain/desc
+EXPLAIN SELECT 字段列表 FROM 表名 WHERE 条件；
+```
+
+EXPLAIN 执行计划各字段含义：
+
+- Id select 查询的序列号，表示查询中执行 select 子句或者是操作表的顺序(id 相同，执行顺序从上到下；id 不同，值越大，越先执行)。
+- select type 表示 SELECT 的类型，常见的取值有 SIMPLE(简单表，即不使用表连接或者子查询)、PRIMARY(主查询，即外层的查询)、 UNION(UNION 中的第二个或者后面的查询语句)、SUBQUERY(SELECT/WHERE 之后包含了子查询)等
+- type 表示连接类型，性能由好到差的连接类型为 `NULL、system、const、eq_ref、ref、range、index、all。 possible key`
+- possible_key 显示可能应用在这表上的索引，一个或多个
+
+- Key 实际使用的索引，如果为 NU 儿 L,则没有使用索引。
+
+- Key_len 表示索引中使用的字节数，该值为索引字段最大可能长度，并非实际使用长度，在不损失精确性的前提下，长度越短越好。
+
+- rows MySQL 认为必须要执行查询的行数，在 innodb 引擎的表中，是一个估计值，可能并不总是准确的。
+
+- filtered 表示查询的百分比，可能会有些偏差，因为这个值是通过查询过程中的计算得出的，所以是一个估计值。
+
+### 索引使用
+
+在未建立索引之前，执行如下 SQL 语句，查看 SQL 的耗时。
+
+```sql
+SELECT FROM tb sku WHERE sn ='100000003145001';
+```
+
+针对字段创建索引
+
+```sql
+create index idx_sku_sn on tb_sku(sn);
+```
+
+然后再次执行相同的 SQL 语句，再次查看 SQL 的耗时。
+
+```sql
+SPLECT FROM tb sku WHERE sn ='100000003145001';
+```
+
+#### 最左前缀法则
+
+如果索引了多列（联合索），要遵守最左前缀法则。最左前缀法则指的是查询从索的最左列开始，并且不跳过索引中的列如果跳跃某一列，**索引将部分失效(后面的字段索引失效)**。
+
+```sql
+explain select*from tb_user where profession='软件工程'and age=31 and status='o';
+```
+
+```sql
+explain select*from tb_user where profession='软件工程'and age=31;
+```
+
+```sql
+explain select*from tb_user where profession='软件工程';
+```
+
+```sql
+explain select from tb user where age =31 and status ='0';
+```
+
+```sql
+explain select from tb_user where status ='0';
+```
+
+#### 范围查询
+
+范围查询右边的查询条件将失效，出现范围查询（>,<）(条件允许下，尽量使用>=，<=)
+
+```sql
+explain select*from tb user where profession='软件工程'and.age>30 and status='o';
+explain select*from tb_user where profession='软件工程and age>= 30 and status='o';
+```
+
+#### 索引列运算
+
+不要再索引列上进行运算操作，**索引将失效**
+
+```sql
+explain select from tb_user where substring(phone,10,2)='15';
+```
+
+#### 字符串不加引号
+
+字符串类型字段使用时，不加引号，**索引将失效**
+
+```sql
+explain select * from tb_user where profession ='软件工程 and age=31 and status=O;
+
+explain select * from tb_user where phone 17799990015;
+```
+
+#### 模糊匹配
+
+如果仅仅是尾部模糊匹配，索引不会失效。如果是头部模糊匹配，索引失效。
+
+```sql
+select * from tb_user where profession like '%工程';
+
+select * from tb_user where profession like '软件%'; √
+
+select * from tb_user where profession like '%工%';
+```
+
+#### or 连接的条件
+
+> 用 o 分割开的条件，如果 o 前的条件中的列有索引，而后面的列中没有索引，那么涉及的索引都不会被用到。(只有两次都有索引才生效)
+
+```sql
+explain select from tb_user where id 10 or age =3;
+explain select from tb_user where phone ='17799990017'or age 23;
+```
+
+#### 数据分布影响
+
+**_如果 mysql 评估使用索引比全表慢，则不使用索引_**
+
+#### sql 提示
