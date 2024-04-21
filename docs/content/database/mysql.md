@@ -1080,3 +1080,68 @@ explain select from tb_user where phone ='17799990017'or age 23;
 **_如果 mysql 评估使用索引比全表慢，则不使用索引_**
 
 #### sql 提示
+
+> SQL 提示，是优化数据库的一个重要手段，简单来说，就是在 SQL 语句中加入一些人为的提示来达到优化操作的目的。
+
+user index:
+
+```sql
+explain select*  from tb_user use index(idx_user._pro) where profession='软件工程'；
+```
+
+ignore index：
+
+```sql
+explain select * from tb_user ignore index(idx_user._pro) where profession='软件工程'：
+```
+
+force index：
+
+```sql
+explain select * from tb_user force index(idx_user._pro) where profession='软件工程'：
+```
+
+#### 索引失效场景
+
+- 索引列类型不匹配：索引列类型不匹配，索引失效。
+- 索引列运算：索引列运算，索引失效。
+- 字符串不加引号：字符串不加引号，索引失效。
+- 模糊匹配：模糊匹配，索引失效。
+- or 连接的条件：or 连接的条件，索引失效。
+
+#### 覆盖索引
+
+> 尽量使用覆盖索引（查询使用了索引，并且需要返回的列，在该索引中已经全部能够找到），减少 **select \***。
+
+```sql
+explain select id,profession from tb user where profession=''and age=31 and status ='0';
+explain select id,profession,age,status from tb_user where profession =and age=31 and status ='0';
+explain select id,profession,age,status,name from tb_user where profession and age =31 and status='0';
+explain select*from tb_user where profession='软件工程'and age=31 and status='o';
+```
+
+:::tip 提示：
+`using index condition`查找使用了索引，但是需要回表查询数据 <br>
+`using where;using index`查找使用了索引，但是需要的数据都在索引列中能找到，所以不需要回表查询数据
+:::
+
+#### 前缀索引
+
+> 当字段类型为字符串(varchar,text 等)时，有时候需要索引很长的字符串，这会让索引变得很大，查询时，浪费大量的磁盘 O,影响查询效率。此时可以只将字符串的一部分前缀，建立索引，这样可以大大节约索引空间，从而提高索引效率。
+
+语法：
+
+```sql
+create index idx_name on tb_name(name(10));前10个字符设置索引
+```
+
+前缀长度：
+
+1. 较短的前缀长度，索引占用空间较小，查询效率较高，但是索引失效的概率较大。
+2. 较长的前缀长度，索引占用空间较大，查询效率较低，但是索引失效的概率较低。
+3. 前缀长度的选择，需要根据实际情况进行选择。
+
+```sql
+select count(distinct email)/count(*)from tb_user
+select count(distinct substring(email,1,5))/count(*)from tb_user
+```
