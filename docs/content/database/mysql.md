@@ -1083,7 +1083,7 @@ explain select from tb_user where phone ='17799990017'or age 23;
 
 > SQL 提示，是优化数据库的一个重要手段，简单来说，就是在 SQL 语句中加入一些人为的提示来达到优化操作的目的。
 
-user index:
+use index:
 
 ```sql
 explain select*  from tb_user use index(idx_user._pro) where profession='软件工程'；
@@ -1108,6 +1108,7 @@ explain select * from tb_user force index(idx_user._pro) where profession='软�
 - 字符串不加引号：字符串不加引号，索引失效。
 - 模糊匹配：模糊匹配，索引失效。
 - or 连接的条件：or 连接的条件，索引失效。
+- 如果 mysql 评估走全部扫描比索引快，索引失效。
 
 #### 覆盖索引
 
@@ -1145,3 +1146,76 @@ create index idx_name on tb_name(name(10));前10个字符设置索引
 select count(distinct email)/count(*)from tb_user
 select count(distinct substring(email,1,5))/count(*)from tb_user
 ```
+
+#### 单列索引与联合索引
+
+- 单列索引：索引列只有一个，索引的结构较为简单，查询效率较高。
+- 联合索引：索引列有多个，索引的结构较为复杂，查询效率较低。
+
+#### 索引设计原则
+
+1. 针对于数据量较大，且查询比较频繁的表建立索引。
+2. 针对于常作为查询条件(where)、排序(order by）、分组(group by)操作的字段建立索引。
+3. 尽量选择区分度高的列作为索引，尽量建立唯一索引，区分度越高，使用索引的效率越高。
+4. 如果是字符串类型的字段，字段的长度较长，可以针对于字段的特点，建立前缀索引。
+5. 尽量使用联合索引，减少单列索引，查询时，联合索引很多时候可以覆盖索引，节省存储空间，避免回表，提高查询效率。
+6. 要控制索引的数量，索引并不是多多益善，索引越多，维护索引结构的代价也就越大，会影响增删改的效率。
+7. 如果索引列不能存储 NULL 值，请在创建表时使用 NOT NULL 约束它。当优化器知道每列是否包含 NULL 值时，它可以更好地确定哪个索引最有效地用于查询。
+
+## sql 优化 {sql-optimization}
+
+### 插入数据
+
+insert 优化：
+
+- 批量插入：一次性插入多条数据，减少网络传输，提高插入效率。
+
+```sql
+insert into tb_test values(1,'tom'),(2,'cat'),(3,'jetrty')
+```
+
+手动提交事务
+
+```sql
+start transaction;
+insert into tb_test values(1,'tom'),(2,'cat'),(3,'jetrty');
+insert into tb_test values(4,'tom'),(5,'cat'),(6,'jetrty');
+insert into tb_test values(7,'tom'),(8,'cat'),(9,'jetrty');
+commit;
+```
+
+主键顺序插入
+
+```sql
+主键乱序插入：8192188241589573主键顺序插入：1234578915218889
+```
+
+#### 大批量插入数据
+
+如果一次性需要插入大批量数据，使用 `insert` 语句插入性能较低，此时可以使用 MySQL 数据库提供的`load`指令进行插入。操作如下：
+
+![大批量插入数据](/assets/images/大批量插入.png)
+
+```sql
+#客户端连接服务端时，加上参数-local--infile
+mysql--local-infile -u root -p
+
+#设置全局参数local infile:为1，开启从本地加载文件导入数据的开关
+set global local infile =1;
+
+#执行load指令将准备好的数据，加载到表结构中
+load data local infile '/root/sql1.log' into table tb_user fields terminated by ',' lines terminated by '\n'
+```
+
+### 主键优化
+
+#### 数据组织方式
+
+在 InnoDB 存储引擎中，表数据都是根据主键顺序组织存放的，这种存储方式的表称为**索引组织表**(index organized table IOT)。
+
+![innodb存储结构](/assets/images/innodb存储结构.png)
+![逻辑存储结构](/assets/images/逻辑存储结构.png)
+
+#### 页分裂
+
+> 页可以为空，也可以填充一半，也可以填充 100%。每个页包含了 2-N 行数据（如果一行数据多大，会行溢出），根据主键排列。
