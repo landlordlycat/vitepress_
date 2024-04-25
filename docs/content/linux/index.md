@@ -693,9 +693,9 @@ ps -ef | grep tail
 
 - 可以通过`top`命令查看 cpu，内存使用情况
 
-![top](./assets/images/top命令内容详解1.png)
+![top](/assets/images/top命令内容详解1.png)
 
-![top](./assets/images/top命令内容详解2.png)
+![top](/assets/images/top命令内容详解2.png)
 
 top 命令选项：
 
