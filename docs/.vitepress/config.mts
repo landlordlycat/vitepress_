@@ -86,7 +86,7 @@ export default defineConfig({
               },
               {
                 text: '进阶篇',
-                link: '/database/mysql/advance.md'
+                link: '/database/mysql/advance'
               },
               {
                 text: '运维篇',
