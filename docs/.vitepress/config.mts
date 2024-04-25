@@ -69,7 +69,7 @@ export default defineConfig({
           },
           {
             text: 'linux',
-            link: '/linux'
+            link: '/linux/'
           }
         ]
       },
@@ -78,7 +78,21 @@ export default defineConfig({
         items: [
           {
             text: 'mysql',
-            link: '/database/mysql'
+            collapsed: true,
+            items: [
+              {
+                text: '基础篇',
+                link: '/database/mysql/'
+              },
+              {
+                text: '进阶篇',
+                link: '/database/mysql/advance.md'
+              },
+              {
+                text: '运维篇',
+                link: '/database/mysql'
+              }
+            ]
           }
         ]
       }
