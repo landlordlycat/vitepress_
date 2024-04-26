@@ -958,3 +958,477 @@ end;
 
 call p7(100)
 ```
+
+### repeat
+
+> repeat 是有条件的循环控制语句，当满足条件的时候退出循环。具体语法为：
+
+```sql
+REPEAT
+  SQL逻辑...
+UNTIL 条件
+END REPEAT;
+```
+
+计算从 1 累加到 10 的值
+
+```sql
+create procedure p8(in n int)
+begin
+   declare total int default 0;
+   repeat
+      set total := total + n
+      set n := n - 1
+   until n <= 0
+   end repeat;
+
+   select total;
+end;
+
+call p8(10) -- 55
+```
+
+### loop
+
+> LOOP 实现简单的循环，如果不在 SQL 逻辑中增加退出循环的条件，可以用其来实现简单的死循环。LOOP 可以配合一下两个语句使用：
+
+- LEAVE:配合循环使用，退出循环。
+- ITERATE:必须用在循环中，作用是跳过当前循环剩下的语句，直接进入下一次循环。
+
+```sql
+# 无限循环
+[begin_label:]loop
+  SQL逻辑...
+end loop [end_label];
+
+LEAVE label; --退出指定标记的循环体（`break`）
+ITERATE label;--直接进入下一次循环(`continue`)
+```
+
+1. 计算从 1 累加到 n 的值，n 为传入的参数值。
+
+```sql
+create procedure p9(in n int)
+begin
+   declare total int default 0;
+   sum:loop
+      if n<=0 then
+        leave sum;
+      end if;
+      set total := total + n
+      set n := n - 1;
+   end loop sum
+
+   select total;
+end;
+
+call p9(10) --55
+```
+
+---
+
+2. 计算从 1 到 n 之间的偶数累加的值，n 为传入的参数值。
+
+```sql
+create procedure p10(in n int)
+begin
+   declare total int default 0;
+   sum:loop
+      if n<=0 then
+        leave sum;
+      elseif n%2<>0 then
+        set n := n - 1;
+        iterate sum;
+      end if;
+      set total := total + n
+      set n := n - 1;
+   end loop sum
+
+   select total;
+end;
+
+call p10(10) --30
+```
+
+### cursor
+
+> 游标(CURSOR)是用来存储查询结果集的数据类型，在存储过程和函数中可以使用游标对结果集进行循环的处理。游标的使用包括游标的声明、OPEN、FETCH 和 CLOSE,其语法分别如下。
+
+声明游标
+
+```sql
+DECLARE 游标名称 CURSOR FOR 查询语句；
+```
+
+打开游标
+
+```sql
+OPEN 游标名称
+```
+
+获取游标记录
+
+```sql
+FETCH 游标名称 INTO 变量[,变量]；
+```
+
+关闭游标
+
+```sql
+CLOSE 游标名称
+```
+
+根据传入的参数 uage,来查询用户表 tb_user 中，所有的用户年龄小于等于 uage 的用户姓名(name)和专业( profession),并将用户的姓名和专业插入到所创建的一张新表(id,name,profession)中。
+
+- **逻辑**：
+
+1. 声明游标，存情查询结果集
+   准备：创建表结构
+2. 开启游标
+3. 获取游标中的记录
+4. 插入数据到新表中
+5. 关闭游标
+
+```sql{7}
+create procedure p11(in uage int)
+begin
+   declare uname varchar(100);
+   declare upro varchar(100);
+
+   declare u_cursor cursor for select name,profession from tb_user where age <= uage;
+   declare EXIT handler for sqlstate '02000' close u_cursor;
+
+   drop table if exists tb_user_pro;
+
+   create table if not exists tb_user_pro(
+      id int primary key auto_increment,
+      name varchar(100),
+      profession varchar(20)
+   )
+
+   open u_cursor;
+
+   while true do
+      fetch u_cursor into uname,upro;
+      insert into tb_user_pro values(null,uname,upro);
+   end while
+   close u_cursor;
+end;
+
+call p11(20)
+```
+
+### 条件处理程序
+
+> 条件处理程序(Handler)可以用来定义在流程控制结构执行过程中遇到问题时相应的处理步骤。具体语法为：
+
+```sql
+DECLARE handler_action HANDLER FOR condition_value [,condition_value]...statement;
+handler_action:
+   CONTINUE:继续执行当前程序
+   EXIT:终止执行当前程序
+condition_value:
+   SQLSTATE sqlstate_value:状态码，如02000
+   SQLWARNING:所有以01开头的SQLSTATE代码的简写
+   NOT FOUND:所有以02开头的SQLSTATE代码的简写
+   SQLEXCEPTION:所有没有被SQLWARNING或NOT FOUND捕获的SQLSTATE代码的简写
+```
+
+## 存储函数
+
+> 存储函数是有返回值的存储过程，存储函数的参数只能是 `IN` 类型的。具体语法如下：
+
+```sql
+CREATE FUNCTION 存储函数名称([参数列表]) RETURNS type [characteristic...]
+BEGIN
+   --SQL语句
+   RETURN ...;
+END;
+
+characteristici说明：
+
+- DETERMINISTIC:相同的输入参数总是产生相同的结果
+- NO SQL:不包含SQL语句。
+- READS SQL DATA:包含读取数据的语句，但不包含写入数据的语句。
+```
+
+```sql
+create function fun1(n int)
+returns int DETERMINISTIC
+begin
+   declare total int default 0;
+
+   while n>0 do
+      set total := total + n;
+      set n := n - 1;
+   end while;
+
+   return total;
+end;
+
+select fun1(100) --5050
+```
+
+## 触发器
+
+> 触发器是与表有关的数据库对象，指在`insert/update/delete `之前或之后，触发并执行触发器中定义的 `SQL` 语句集合。触发器的这种特性可以协助应用在数据库端确保数据的完整性，日志记录，数据校验等操作。<br>
+> 使用别名 `OLD` 和 `NEW` 来引用触发器中发生变化的记录内容，这与其他的数据库是相似的。现在触发器还只支持行级触发，不支持语句级触发。
+
+| 触发器类型      | NEW 和 OLD                                             |
+| --------------- | ------------------------------------------------------ |
+| INSERT 型触发器 | NEW 表示将要或者已经新增的数据                         |
+| UPDATE 型触发器 | OLD 表示修改之前的数据，NEW 表示将要或已经修改后的数据 |
+| DELETE 型触发器 | OLD 表示将要或者已经删除的数据                         |
+
+- 语法
+
+\> 创建
+
+```sql
+CREATE TRIGGER trigger_name
+BEFORE/AFTER INSERT/UPDATE/DELETE ON tbl_name FOR EACH ROW --行级触发器
+BEGIN
+   trigger_stmt;
+END;
+```
+
+:::details 查看
+
+```sql
+SHOW TRIGGERS;
+```
+
+:::
+:::details 删除
+
+```sql
+DROP TRIGGER [schema_name.]trigger_name; --如果没有指定schema_name,默认为当前数据库
+```
+
+:::
+
+**练习**：
+
+通过触发器记录 `tb_user` 表的数据变更日志，将变更日志插入到日志表 `tb_user_logs` 中，包含增加，修改，删除；
+
+```sql
+create table user_logs(
+   id int(11)not null auto_increment, operation varchar(20)not null comment'操作类型,insert/update/delete', operate_time datetime not null comment'操作时间'，
+   operate_id int(11)not null comment'操作的1D',
+   operate_params varchar(500)comment'操作参数,
+   primary key(`id`))engine=innodb default charset=utf8;
+```
+
+\# 插入数据触发器
+
+```sql
+create trigger tb_user_insert_trigger
+   after insert on tb_user for each row
+begin
+   insert into user_logs(id,operation,operate_time,operate_id,operate_params) values(null,'insert',now(),new.id,concat('插入的数据内容为：id=',new.id,' name=',new.name,'phone=',new.phone,'email=',new.email,'profession=',new.profession));
+end;
+```
+
+类似于一个拦截器，在执行了插入语句后，触发器就开始进行插入日志语句到相应的表中。以此类推（`update/delete` 同理）
+
+\# 更新数据触发器
+
+```sql
+create trigger tb_user_update_trigger
+   after update on tb_user for each row
+begin
+   insert into user_logs(id,operation,operate_time,operate_id,operate_params) values(null,'update',now(),new.id,concat('修改前的数据为：id=',old.id,' name=',old.name,'phone=',old.phone,'email=',old.email,'profession=',old.profession,'| 修改后的数据为：id=',new.id,' name=',new.name,'phone=',new.phone,'email=',new.email,'profession=',new.profession));
+end;
+```
+
+\# 删除数据触发器
+
+```sql
+create trigger tb_user_delete_trigger
+   after delete on tb_user for each row
+begin
+   insert into user_logs(id,operation,operate_time,operate_id,operate_params) values(null,'delete',now(),old.id,concat('删除前的数据为：id=',old.id,' name=',old.name,'phone=',old.phone,'email=',old.email,'profession=',old.profession));
+end;
+```
+
+总结：
+
+1. 视图(`VIEW`)
+   > 虚拟存在的表，不保存查询结果，只保存查询的 SQL 逻辑简单<br>
+   > 安全、数据独立
+2. 存储过程(`PROCEDURE`)
+   > 事先定义并存储在数据库中的一段 SQL 语句的集合。
+   > 减少网络交互，提高性能、封装重用
+   > 变量、if、Case、参数(in/out/inout)、while、repeat、loop、cursor、 handler
+3. 存储函数(`FUNCTION`)
+   > 存储函数是有返回值的存储过程、参数类型只能为`IN`类型
+   > 存储函数可以被存储过程替代
+4. 触发器(`TRIGGER`)
+   > 可以在表数据进行引 NSERT、UPDATE、DELETE 之前或之后触发
+   > 保证数据完整性、日志记录、数据校验
+
+## 锁
+
+> 锁是计算机协调多个进程或线程并发访问某一资源的机制。在数据库中，除传统的计算资源(CPU、RAM、I/O)的争用以外，数据也是一种供许多用户共享的资源。如何保证数据并发访问的一致性、有效性是所有数据库必须解决的一个问题，锁冲突也是影响数据库并发访问性能的一个重要因素。从这个角度来说，锁对数据库而言显得尤其重要，也更加复杂。
+
+- 分类
+  MySQL 中的锁，按照锁的粒度分，分为以下三类：
+
+1. 全局锁：锁定数据库中的所有表。
+2. 表级锁：每次操作锁住整张表。
+3. 行级锁：每次操作锁住对应的行数据。
+
+### 全局锁
+
+> 全局锁就是对整个数据库实例加锁，加锁后整个实例就处于只读 DQL 状态，后续的 DML 的写语句，DDL 语句，已经更新操作的事务提交语句都将被阻塞。<br>
+> 其典型的使用场景是做全库的逻辑备份，对所有的表进行锁定，从而获取一致性视图，保证数据的完整性。
+
+```sql
+flush tables with read lock;
+
+mysqldump -h 192.168.200.202 -u root -p xxx db01 > D:/db01.sql
+
+unlock tables;
+```
+
+![全局锁-演示](/assets/images/全局锁-演示.png)
+
+只能查不能操作
+
+```sql
+mysqldump -h 192.168.200.202 -u root -p xxx db01 > D:/db01.sql
+```
+
+- 特点
+
+数据库中加全局锁，是一个比较重的操作，存在以下问题：
+
+1. 如果在主库上备份，那么在备份期间都不能执行更新，业务基本上就得停摆。
+2. 如果在从库上备份，那么在备份期间从库不能执行主库同步过来的二进制日志(binlog),，会导致主从延迟。
+
+在 InnoDB 引擎中，我们可以在备份时加上参数--single-transaction 参数来完成不加锁的一致性数据备份。
+
+```sql
+mysqldump --single-transaction -uroot-p123456 itcast>itcast.sql
+```
+
+### 表级锁
+
+> 表级锁，每次操作锁住整张表。锁定粒度大，发生锁冲突的概率最高，并发度最低。应用在 MyISAM、InnoDB、BDB 等存储引擎中。
+
+对于表级锁，主要分为以下三类：
+
+1. 表锁
+2. 元数据锁(meta data lock,MDL)
+3. 意向锁
+
+#### 表锁
+
+对于表锁，分为两类：
+
+1. 表共享读锁(read lock)
+2. 表独占写锁(write lock)
+
+语法：
+
+1. 加锁：`lock tables 表名..read/write`。
+2. 释放锁：`unlock tables/客户端断开连接`。
+
+![表锁-读](/assets/images/表锁-读.png)
+
+(当前客服端和其他客服端都可以读)
+
+![表锁-写](/assets/images/表锁-写.png)
+
+(当前客服端可以写读，其他客服端都不能读和写)
+
+> [!important]
+> 读锁不会阻塞其他客户端的读，但是会阻塞写。写锁既会阻塞其他客户端的读，又会阻塞其他客户端的写。
+
+#### 元数据锁 (meta data lock,MDL)
+
+> MDL 加锁过程是系统自动控制，无需显式使用，在访问一张表的时候会自动加上。MDL 锁主要作用是维护表元数据的数据一致性，在表上有活动事务的时候，不可以对元数据进行写入操作。**为了避免 `DML` 与 `DDL` 冲突，保证读写的正确性。**
+
+在 MySQL5.5 中引入了 MDL,当对一张表进行增删改查的时候，加 MDL 读锁(共享)；当对表结构进行变更操作的时候，加 MDL 写锁（排他）。
+
+![元数据锁](/assets/images/元数据锁.png)
+
+```sql
+begin
+   select * from account;(其他客服端也是有共享读)
+   alter table add column xx int  (与其他的mdl互斥)
+commit;
+```
+
+查看元数据锁：
+
+```sql
+select object_type,object_schema,object _name,lock_type,lock_duration from performance_schema.metadata_locks;
+```
+
+#### 意向锁
+
+> 为了避免 DML 在执行时，加的行锁与表锁的冲突，在 InnoDB 中引入了意向锁，使得表锁不用检查每行数据是否加锁，使用意向锁来减少表锁的检查。
+
+意向锁（Intention Lock）是数据库管理系统中的一种锁机制，用于协调事务对共享资源的访问。它不是针对某一具体数据行或对象的锁，而是用来表明事务意图锁定一个范围内的资源，比如一个表或一个页面。
+
+![意向锁](/assets/images/意向锁.png)
+
+1. 意向共享锁(IS):由语句`select..lock in share mode`添加。
+2. 意向排他锁(lX):由`insert、update、delete、select..for update`添加。
+
+3. 意向共享锁(IS):与表锁共享锁(read)兼容，与表锁排它锁(write)互斥。
+4. 意向排他锁(IX):与表锁共享锁(read)及排它锁(write)都互斥。意向锁之间不会互斥。
+
+可以通过以下 SQL,查看意向锁及行锁的加锁情况：
+
+```sql
+select object_schema,object_name,index_name,lock_type,lock_mode,lock_data from performance_schema.data_locks;
+```
+
+### 行级锁
+
+> 行级锁，每次操作锁住对应的行数据。锁定粒度最小，发生锁冲突的概率最低，并发度最高。应用在 InnoDB 存储引擎中。
+
+InnoDB 的数据是基于索引组织的，行锁是通过对索引上的索引项加锁来实现的，而不是对记录加的锁。对于行级锁，主要分为以下三类：
+
+1. 行锁(Record Lock):锁定单个行记录的锁，防止其他事务对此行进行`update`和`delete`。在 RC(read committed)、RR(repeatable read) 隔离级别下都支持。
+2. 间隙锁(Gap Lock)：锁定索引记录间隙（不含该记录），确保索引记录间隙不变，防止其他事务在这个间隙进行 `insert`,产生幻读。在 RR 隔离级别下都支持。
+3. 临键锁(NeXt-Key Lock)：**行锁**和**间隙锁**组合，同时锁住数据，并锁住数据前面的间隙 Gap。在 RR 隔离级别下支持。
+
+![间隙锁](/assets/images/间隙锁.png)
+
+#### 行锁
+
+InnoDB 实现了以下两种类型的行锁：
+
+1. 共享锁(S)：允许一个事务去读一行，阻止其他事务获得相同数据集的排它锁。
+2. 排他锁(X)：允许获取排他锁的事务更新数据，阻止其他事务获得相同数据集的共享锁和排他锁。
+
+![共享锁-排他锁-兼容](/assets/images/共享锁-排他锁-兼容.png)
+![行锁](/assets/images/行锁.png)
+
+演示：
+
+默认情况下，InnoDB 在 REPEATABLE READ 事务隔离级别运行，InnoDB 体用 next-key 锁进行搜索和索引扫描，以防止幻读。
+
+1. 针对唯一索引进行检索时，对已存在的记录进行等值匹配时，将会自动优化为行锁。
+2. InnoDB 的行锁是针对于索引加的锁，不通过索引条件检索数据，（如果字段没有索引）那么 InnoDB:将对表中的所有记录加锁，此时**就会升级为表锁**。
+
+#### 间隙锁/临键锁-演示
+
+默认情况下，InnoDB 在 REPEATABLE READ 事务隔离级别运行，InnoDB 使用 next-key 锁进行搜索和索引扫描，以防止幻读。
+
+1. 索引上的等值查询（唯一索引），给不存在的记录加锁时，优化为间隙锁（`where id = 5` --id 为 3 和 8 之间的(不包含)间隙锁 ）
+
+```sql
+begin
+   select * from account where id = 5;
+commit;
+```
+
+2.  索引上的等值查询（普通索引-不唯一），向右遍历时最后一个值不满足查询需求时，next-key lock 退化为间隙锁。
+3.  索引上的范围查询（唯一索引）-会访问到不满足条件的第一个值为止。
+
+> [!warning]
+> 间隙锁唯一目的是防止其他事务插入间隙。间隙锁可以共存，一个事务采用的间隙锁不会阻止另一个事务在同一间隙上采用间隙锁。
