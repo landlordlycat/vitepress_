@@ -22,7 +22,7 @@ onMounted(async()=>{
 
 <div :class="$style.yiyan">
 <span>一言</span>
-<span> {{yiyan.hitokoto ?? '接口请求失败，请稍后再重试~'}} --{{yiyan.from ?? ''}}
+<span :class="$style.hitokoto"> {{yiyan.hitokoto ?? '接口请求失败，请稍后再重试~'}} --{{yiyan.from ?? ''}}
 </span>
 <button :class="$style.button" @click="getYiyan">下一条</button>
 
@@ -49,4 +49,18 @@ onMounted(async()=>{
   background-color: rgba(0,0,0,0.02);
   color:#555
 }
+
+.hitokoto {
+  cursor: pointer;
+  background: linear-gradient(to right,#742f2b,#146420) no-repeat right bottom;
+  background-size:0% 2px;
+  transition:background-size 1s;
+  padding: 5px 10px;
+}
+
+.hitokoto:hover {
+  background-position:left bottom;
+  background-size:100% 2px;
+}
+
 </style>

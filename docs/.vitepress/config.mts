@@ -90,7 +90,7 @@ export default defineConfig({
               },
               {
                 text: '运维篇',
-                link: '/database/mysql'
+                link: '/database/mysql/ops'
               }
             ]
           }
