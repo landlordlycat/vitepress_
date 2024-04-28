@@ -28,19 +28,23 @@ export default defineConfig({
         items: [
           {
             text: 'vue',
-            link: '/vue'
+            link: '/vue/'
           },
           {
             text: 'react',
-            link: '/react'
+            link: '/react/'
           },
           {
             text: 'database',
-            link: '/database/mysql'
+            link: '/database/'
           },
           {
             text: 'linux',
-            link: '/linux'
+            link: '/linux/'
+          },
+          {
+            text: 'docker',
+            link: '/docker/'
           }
         ]
       },
@@ -55,48 +59,70 @@ export default defineConfig({
       }
     ],
 
-    sidebar: [
-      {
-        text: '简介',
-        items: [{ text: 'profile', link: '/profile' }]
-      },
-      {
-        text: '前端',
-        items: [
-          {
-            text: 'vue',
-            link: '/vue'
-          },
-          {
-            text: 'linux',
-            link: '/linux/'
-          }
-        ]
-      },
-      {
-        text: '数据库',
-        items: [
-          {
-            text: 'mysql',
-            collapsed: true,
-            items: [
-              {
-                text: '基础篇',
-                link: '/database/mysql/'
-              },
-              {
-                text: '进阶篇',
-                link: '/database/mysql/advance'
-              },
-              {
-                text: '运维篇',
-                link: '/database/mysql/ops'
-              }
-            ]
-          }
-        ]
-      }
-    ],
+    sidebar: {
+      '/profile': [
+        {
+          text: '简介',
+          items: [{ text: 'profile', link: '/profile' }]
+        }
+      ],
+      '/vue': [
+        {
+          items: [
+            {
+              text: 'vue',
+              link: '/vue/'
+            }
+          ]
+        }
+      ],
+      '/database': [
+        {
+          items: [
+            {
+              text: 'mysql',
+              collapsed: true,
+              items: [
+                {
+                  text: '基础篇',
+                  link: '/database/mysql/'
+                },
+                {
+                  text: '进阶篇',
+                  link: '/database/mysql/advance'
+                },
+                {
+                  text: '运维篇',
+                  link: '/database/mysql/ops'
+                }
+              ]
+            },
+            {
+              text: 'redis',
+              collapsed: true,
+              items: [
+                {
+                  text: '基础篇',
+                  link: '/database/redis/'
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      '/linux': [
+        {
+          text: 'linux',
+          link: '/linux/'
+        }
+      ],
+      '/docker': [
+        {
+          text: 'docker',
+          link: '/docker/'
+        }
+      ]
+    },
     socialLinks: [{ icon: 'github', link: 'https://gitee.com/fddm' }],
     search: {
       provider: 'local'
