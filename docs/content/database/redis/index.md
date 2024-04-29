@@ -122,10 +122,92 @@ redis 服务并执行 `PING` 命令，该命令用于检测 redis 服务是否�
 - 删除全部键
   `FLUSHALL`
 
+---
+
 ### Hash(哈希)
 
 > Redis hash 是一个 string 类型的 field（字段） 和 value（值） 的映射表，hash 特别适合用于存储对象。
 
+1. `HDEL key field1 [field2]` 删除一个或多个哈希表字段
+2. `HEXISTS key field` 查看哈希表 key 中，指定的字段是否存在。
+3. `HGET key field` 获取存储在哈希表中指定字段的值。
+4. `HGETALL key` 获取在哈希表中指定 key 的所有字段和值
+5. `HINCRBY key field increment` 哈希表中字段值自增
+6. `HINCRBYFLOAT key field increment` 哈希表中字段值自增
+7. `HKEYS key` 获取所有哈希表字段
+8. `HLEN key` 获取哈希表 key 的长度
+9. `HMGET key field1 [field2]` 获取所有给定字段的值
+10. `HMSET key field1 value1 [field2 value2 ]` 同时将多个 field-value (域-值)对设置到哈希表 key 中。
+11. `HSET key field value` 将哈希表 key 中的字段 field 的值设为 value
+12. `HVALS key` 获取哈希表 key 中的所有值
+13. `HSCAN key cursor [MATCH pattern] [COUNT count]` 迭代哈希表中的键值对
+
 ---
+
+### List(列表)
+
+> Redis 列表是简单的字符串列表，按照插入顺序排序。你可以添加一个元素到列表的头部（左边）或者尾部（右边）
+
+1. `LPUSH key value1 [value2]` 将一个或多个值 value 插入到列表 key 的表头
+2. `RPUSH key value1 [value2]` 将一个或多个值 value 插入到列表 key 的表尾
+3. `LLEN key` 获取列表 key 的长度
+4. `LPOP key` 移除并返回列表 key 的头元素
+5. `RPOP key` 移除并返回列表 key 的尾元素
+6. `LPUSHX key value` 将值 value 插入到列表 key 的表头，如果列表 key 不存在，则`LPUSHX` 会创建一个空列表并执行 `LPUSH`
+7. `RPUSHX key value` 为已存在的列表添加值
+8. `LRANGE key start stop` 获取列表 key 中指定范围内的元素，闭区间
+9. `LSET key index value` 将列表 key 下标为 index 的元素的值设置为 value
+10. `LTRIM key start stop` 对一个列表进行修剪(trim),就是说，让列表只保留指定区间内的元素，不在指定区间之内的元素都将被删除
+11. `LINSERT key BEFORE|AFTER pivot value (linsert person before 'meter' 'kiki')` 在列表的元素前或者后插入元素
+12. `LINDEX key index` 通过索引获取列表中的元素
+13. `LREM key count value` 根据参数 count 的值，移除列表中与参数 value 相等的元素
+
+- count > 0： 从表头开始向表尾搜索，移除与 value 相等的元素，数量为 count
+- count < 0： 从表尾开始向表头搜索，移除与 value 相等的元素，数量为 count 的绝对值
+- count = 0： 移除表中所有与 value 相等的值
+
+14. `BLPOP key1 [key2 ] timeout` 移出并获取列表的第一个元素， 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。
+15. `BRPOP key1 [key2 ] timeout` 移出并获取列表的最后一个元素， 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。
+16. `RPOPLPUSH source destination timeout` 从列表中弹出一个值，并将弹出的元素插入到另外一个列表中并返回它； 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。
+17. `BRPOPLPUSH source destination timeout` 从列表中弹出一个值，将弹出的元素插入到另外一个列表中并返回它； 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。
+
+---
+
+### Set(集合)
+
+:::tip
+集合是唯一性，无序性，确定性。
+
+集合对象的编码可以是 intset 或者 hashtable。
+Redis 中集合是通过哈希表实现的，所以添加，删除，查找的复杂度都是 O(I)。
+
+集合中最大的成员数为 232 - 1 (4294967295, 每个集合可存储 40 多亿个成员)。
+:::
+
+1. `SADD key member1 [member2]` 给集合添加多个成员
+2. `SCARD key` 获取集合的成员数
+3. `SDIFF key1 [key2]` 返回第一个集合与其他集合之间的差异。
+4. `SDIFFSTORE destination key1 [key2]` 返回给定所有集合的差集并存储在 destination 中
+5. `SINTER key1 [key2]` 返回给定所有集合的**交集**
+6. `SINTERSTORE destination key1 [key2]` 返回给定所有集合的交集并存储在 destination 中
+7. `SISMEMBER key member` 判断 member 是否是 key 的成员
+8. `SMEMBERS key` 获取集合的所有成员
+9. `SMOVE source destination member` 将 member 元素从 source 集合移动到 destination 集合 - `smove list list1 1`
+10. `SPOP key [count]` 移除并返回集合中的一个随机元素 count 是个数默认为 1
+11. `SRANDMEMBER key [count]` 返回集合中一个或多个随机数
+12. `SREM key member1 [member2]` 移除给定集合中的一个或多个成员，不存在的成员将被忽略
+13. `SUNION key1 [key2]` 返回所有给定集合的**并集**
+14. `SUNIONSTORE destination key1 [key2]` 返回所有给定集合的并集并存储在 destination 中
+15. `SSCAN key cursor [MATCH pattern] [COUNT count]` 迭代集合中的元素
+
+---
+
+### Sorted Set(有序集合)
+
+Redis 有序集合和集合一样也是 string 类型元素的集合,且不允许重复的成员。
+
+不同的是每个元素都会关联一个 double 类型的分数。redis 正是通过分数来为集合中的成员进行从小到大的排序。
+
+有序集合的成员是唯一的,但分数(score)却可以重复。
 
 ![redis](/assets/images/redis.png)
