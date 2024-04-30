@@ -172,7 +172,7 @@ docker run -d \
 7. `docker restart` 重新启动容器
 8. `docker logs containerName`：查看容器日志
 9. `docker inspect` 查看容器详细信息
-10. `docker save [-o] IMAGE:latest [IMAGE...]`：导出一个镜像
+10. `docker save [-o] 文件名.tar IMAGE:latest [IMAGE...] -- docker save IMAGE:latest > FILENAME.tar`：导出一个镜像
 11. `docker load -i filename [-q]`：导入一个镜像
 12. `docker exec -it imageName bash`：进入容器
 13. `docker rm containerName`：删除容器
@@ -240,3 +240,281 @@ _需求_：
 | `docker volume rm`      | 删除指定数据卷       | [docker volume rm](https://docs.docker.com/engine/reference/commandline/volume_prune/)        |
 | `docker volume inspect` | 查看某个数据卷的详情 | [docker volume inspect](https://docs.docker.com/engine/reference/commandline/volume_inspect/) |
 | `docker volume prune`   | 清除数据卷           | [docker volume prune](https://docs.docker.com/engine/reference/commandline/volume_prune/)     |
+
+### 本地目录挂载
+
+案例 2-ysql 容器的数据挂载
+
+需求：
+
+- 查看 mysql 容器，判断是否有数据卷挂载
+- 基于宿主机目录实现 MySQL 数据目录、配置文件、初始化脚本的桂载(查阅官方镜像文档)
+  1.  挂载/root/mysql/data 到容器内的/var/ib/mysql 目录
+  2.  挂载/root/mysql/init 到容器内的/docker-entrypoint-initdb.d 目录，携带课前资料准备的 SQL 脚本
+  3.  挂载/root/mysql/conf 到容器内的/etc/mysql/conf.d 目录，携带课前资料准备的配置文件
+
+```shell
+# 1.查看MySQL容器详细信息
+docker inspect mysql
+```
+
+:::tip
+
+- 在执行 docker run 命令时，使用`-v 本地目录：容器内目录`可以完成本地目录挂载
+- 本地目录必须以“`/`”或"`./`"开头，如果直接以名称开头，会被识别为数据卷而非本地目录
+  - -v mysql:var/ib/mysql 会被识别为一个数据卷叫 mysql
+  - -v./mysql:Nar/ib/mysql 会被识别为当前目录下的 mysql 目录
+
+:::
+
+### 自定义镜像
+
+> 镜像就是包含了应用程序、程序运行的系统函数库、运行配置等文件的文件包。构建镜像的过程其实就是把上述文件打包的过程。
+
+举个例子，我们要从 0 部署一个 Java 应用，大概流程是这样：
+
+- 准备一个 linux 服务（CentOS 或者 Ubuntu 均可）
+- 安装并配置 JDK
+- 上传 Jar 包
+- 运行 Jar 包
+
+层(layer)
+
+添加安装包、依赖、配置等，每次操作都形成新的一层。
+
+![镜像结构](/assets/images/镜像结构.png)
+
+#### Dockerfile
+
+> [!note]
+> Dockerfile 就是一个文本文件，其中包含一个个的指令(Instruction),用指令来说明要执行什么操作来构建镜像。将来 Docker 可以根据 Dockerfile 帮我们构建镜像。常见指令如下：
+
+| 指令       | 说明                                           | 示例                           |
+| ---------- | ---------------------------------------------- | ------------------------------ |
+| FROM       | 指定基础镜像                                   | `FROM centos:6  `              |
+| ENV        | 设置环境变量，可在后面指令使用                 | `ENV key value `               |
+| COPY       | 拷贝本地文件到镜像的指定目录                   | `COPY ./xx.jar /tmp/app.jar`   |
+| RUN        | 执行 Linux 的 shell 命令，一般是安装过程的命令 | `RUN yum install gcc `         |
+| EXPOSE     | 指定容器运行时监听的端口，是给镜像使用者看的   | `EXPOSE 8080  `                |
+| ENTRYPOINT | 镜像中应用的启动命令，容器运行时调用           | `ENTRYPOINT java -jar xx.jar ` |
+
+更多语法：[官方文档](https://docs.docker.com/engine/reference/builder/)
+
+:::code-group
+
+```dockerfile [完整]
+# 指定基础镜像
+FROM ubuntu:16.04
+# 配置环境变量，JDK的安装目录、容器内时区
+ENV JAVA_DIR=/usr/local
+ENV TZ=Asia/Shanghai
+# 拷贝jdk和java项目的包
+COPY ./jdk8.tar.gz $JAVA_DIR/
+COPY ./docker-demo.jar /tmp/app.jar
+# 设定时区
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# 安装JDK
+RUN cd $JAVA_DIR \
+ && tar -xf ./jdk8.tar.gz \
+ && mv ./jdk1.8.0_144 ./java8
+# 配置环境变量
+ENV JAVA_HOME=$JAVA_DIR/java8
+ENV PATH=$PATH:$JAVA_HOME/bin
+# 指定项目监听的端口
+EXPOSE 8080
+# 入口，java项目的启动命令
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+```
+
+```dockerfile [优化]
+# 基础镜像
+FROM openjdk:11.0-jre-buster --需要单独下载
+# 设定时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# 拷贝jar包
+COPY docker-demo.jar /app.jar
+# 入口
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+```
+
+:::
+`openjdk:11.0-jre-buster`这个包需要单独下载。导入镜像`docker load -i filename [-q]`
+
+```bash
+# 查看镜像列表：
+docker images
+# 结果
+`REPOSITORY    TAG       IMAGE ID       CREATED          SIZE
+docker-demo   1.0       d6ab0b9e64b9   27 minutes ago   327MB
+nginx         latest    605c77e624dd   16 months ago    141MB
+mysql         latest    3218b38490ce   17 months ago    516MB
+openjdk 11.0-jre-buster 57925f2e4cff   22 months ago    301MB
+```
+
+![docker-demo](/assets/images/docker-demo.png)
+
+当编写好了 Dockerfile,可以利用下面命令来构建镜像：
+
+```shell
+# 进入镜像目录
+cd /root/demo
+docker build -t 镜像名:1.0 Dockerfile目录
+```
+
+- `-t`:是给镜像起名，格式依然是 repository:tag 的格式，不指定 tag 时，默认为 latest
+- `.`:表示当前目录，也就是 Dockerfile 所在的目录
+
+### 网络
+
+Docker 网络是由 Docker Engine 本身提供的，可以通过 `docker network ls` 查看。
+
+默认情况下，所有容器都是以 bridge 方式连接到 Docker 的一个虚拟网桥上：
+
+![网络](/assets/images/网络.png)
+
+加入自定义网络的容器才可以通过容器名互相访问，Docker 的网络操作命令如下：
+
+![自定义网络-指令](/assets/images/自定义网络-指令.png)
+
+选项：**`--network customNetworkName`** 创建时就连上
+
+`docker run -d --name containerName -p 80:80 --network customNetworkName imageName`
+
+```bash
+# 1.首先通过命令创建一个网络
+docker network create hmall
+
+# 2.然后查看网络
+docker network ls
+# 结果：
+NETWORK ID     NAME      DRIVER    SCOPE
+639bc44d0a87   bridge    bridge    local
+403f16ec62a2   hmall     bridge    local
+0dc0f72a0fbb   host      host      local
+cd8d3e8df47b   none      null      local
+# 其中，除了hmall以外，其它都是默认的网络
+
+# 3.让dd和mysql都加入该网络，注意，在加入网络时可以通过--alias给容器起别名
+# 这样该网络内的其它容器可以用别名互相访问！
+# 3.1.mysql容器，指定别名为db，另外每一个容器都有一个别名是容器名
+docker network connect hmall mysql --alias db
+# 3.2.db容器，也就是我们的java项目
+docker network connect hmall dd
+
+# 4.进入dd容器，尝试利用别名访问db
+# 4.1.进入容器
+docker exec -it dd bash
+# 4.2.用db别名访问
+ping db
+# 结果
+PING db (172.18.0.2) 56(84) bytes of data.
+64 bytes from mysql.hmall (172.18.0.2): icmp_seq=1 ttl=64 time=0.070 ms
+64 bytes from mysql.hmall (172.18.0.2): icmp_seq=2 ttl=64 time=0.056 ms
+# 4.3.用容器名访问
+ping mysql
+# 结果：
+PING mysql (172.18.0.2) 56(84) bytes of data.
+64 bytes from mysql.hmall (172.18.0.2): icmp_seq=1 ttl=64 time=0.044 ms
+64 bytes from mysql.hmall (172.18.0.2): icmp_seq=2 ttl=64 time=0.054 ms
+```
+
+### 项目部署
+
+...
+
+### DockerCompose
+
+Docker Compose 通过一个单独的 docker-compose.yml 模板文件(YAML 格式)来定义一组相关联的应用容器，帮助我们实现多个相查关联的 Docker:容器的快速部署。
+
+![DockerCompose](/assets/images/dockercompose.png)
+
+```bash
+docker run -d \
+  --name mysql \
+  -p 3306:3306 \
+  -e TZ=Asia/Shanghai \
+  -e MYSQL_ROOT_PASSWORD=123 \
+  -v ./mysql/data:/var/lib/mysql \
+  -v ./mysql/conf:/etc/mysql/conf.d \
+  -v ./mysql/init:/docker-entrypoint-initdb.d \
+  --network hmall
+  mysql
+```
+
+如果用 `docker-compose.yml` 文件来定义，就是这样：
+
+```bash
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: 123
+    volumes:
+      - "./mysql/conf:/etc/mysql/conf.d"
+      - "./mysql/data:/var/lib/mysql"
+    networks:
+      - new
+networks:
+  new:
+    name: hmall
+
+```
+
+![docker-run](/assets/images/docker-run.png)
+![docker-compose-指令](/assets/images/docker-compose-指令.png)
+
+`docker compose up -d`
+
+```bash
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: 123
+    volumes:
+      - "./mysql/conf:/etc/mysql/conf.d"
+      - "./mysql/data:/var/lib/mysql"
+      - "./mysql/init:/docker-entrypoint-initdb.d"
+    networks:
+      - hm-net
+  hmall:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hmall
+    ports:
+      - "8080:8080"
+    networks:
+      - hm-net
+    depends_on:
+      - mysql
+  nginx:
+    image: nginx
+    container_name: nginx
+    ports:
+      - "18080:18080"
+      - "18081:18081"
+    volumes:
+      - "./nginx/nginx.conf:/etc/nginx/nginx.conf"
+      - "./nginx/html:/usr/share/nginx/html"
+    depends_on:
+      - hmall
+    networks:
+      - hm-net
+networks:
+  hm-net:
+    name: hmall
+```
