@@ -194,5 +194,133 @@ else:
 ```python {2-3}
 while 条件表达式:
     语句块
+    while 条件表达式:
+        语句块
+        break # 跳出当前循环
+    if 条件bool表达式:
+      continue  # 跳过当前循环，继续下一次循环
+```
+
+:::info 知识补充：
+print输出不换行
+
+在print()函数中，如果要输出多个值，中间用逗号隔开，默认会自动加上空格，如果要输出不换行，可以用`end=''`参数。
+
+```python
+print('hello', end='')
+print('world')
+```
+
+输出结果：
+```
+helloworld
+```
+:::
+
+### 九九乘法表
+:::code-group
+
+```python [while循环]
+i = 1 #层数
+while i <= 9:
+    j = 1
+    while j <= i:
+        print(f"{j}*{i}={i * j}\t", end="")
+        j += 1
+    print('\n')
+    i += 1
+```
+
+```python [range()函数]
+for i in range(1, 10):
+    for j in range(1, i+1):
+        print('{0}x{1}={2}\t'.format(j, i, i*j), end='')
+    print()
+```
+
+:::
+
+## for循环的基础语法
+
+除了while循环语句外，Python同样提供了for循环语句。
+
+两者能完成的功能基本差不多，但仍有一些区别：
+- while循环的循环条件是自定义的，**自行控制循环条件** 
+- for循环是一种”轮询”机制，是对一批内容进行 **逐一处理**
+
+:::tip
+同while循环不同，for循环是无法定义循环条件的。只能从被处理的数据集中，依次取出内容进行处理。所以，理论上讲，Python的for循环无法构建无限循环（被处理的数据集不可能无限大）
+:::
+
+```python {2-3}
+for 临时变量 in 可迭代对象:
     语句块
+    for 变量 in 可迭代对象:
+        语句块
+        break # 跳出当前循环
+    if 条件bool表达式:
+      continue  # 跳过当前循环，继续下一次循环
+
+name = 'John'
+for i in name:
+    print(i)
+
+输出结果：
+J
+o
+h
+n
+
+
+```
+```python
+name = 'itheima is a brand of itcast'
+total = 0
+# 1. 统计字符串中字母的个数
+for i in name:
+    if i == 'a':
+        total += 1
+
+print(f"字母 'a' 出现了 {total}")
+```
+### range()函数
+
+> for循环语句，本质上是遍历：序列类型 
+
+尽管除字符串外，其它的序列类型目前没学习到，但是不妨碍我们通过 **学习range语句，获得一个简单的数字序列**。
+
+`range()`函数可以生成一个整数序列，可以用于for循环的循环条件。
+
+语法：`range(start, stop, [,step])`
+
+- `start`：起始值，默认为0, 可以省略
+- `stop`：终止值，**不包含**在序列中
+- `step`：步长，默认为1
+
+
+```python
+for i in range(1, 10):
+    print(i)
+```
+
+
+### 变量作用域
+
+1. 局部变量：在函数内部定义的变量，只能在函数内部访问，函数执行完毕，变量就消失了。
+2. 全局变量：在函数外部定义的变量，可以在整个程序范围内访问。
+3. 内置变量：Python预定义的变量，比如`__name__`、`__doc__`等。
+
+```js
+for i in range(1, 10):
+    print(i)
+print(i) // [!code error]
+
+回看for循环的语法，我们会发现，将从数据集 (序列)中取出的数据赋值给：临时变量为什么是临时的呢？
+
+i应该只在for循环内部使用，而不能在外部使用，所以，i是临时的。
+
+如果我们想在外部使用i，那我们就需要将i定义为全局变量。
+
+但是实际上却是能访问到的。这是不允许的，属于是变量提升了。
+
 ```
