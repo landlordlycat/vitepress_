@@ -53,7 +53,11 @@ export default defineConfig({
         items: [
           {
             text: 'nest',
-            link: '/nest'
+            link: '/nest/'
+          },
+          {
+            text: 'python',
+            link: '/python/'
           }
         ]
       }
@@ -120,6 +124,31 @@ export default defineConfig({
         {
           text: 'docker',
           link: '/docker/'
+        }
+      ],
+      '/python': [
+        {
+          items: [
+            {
+              collapsed: true,
+              text: 'python',
+              items: [
+                {
+                  text: '基础篇',
+                  link: '/python/'
+                },
+                {
+                  text: '高级篇',
+                  link: '/python/advance'
+                },
+                {
+                  text: '高级篇',
+                  link: '/python/advance'
+                
+                }
+              ]
+            }
+          ]
         }
       ]
     },
