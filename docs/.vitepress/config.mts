@@ -139,15 +139,15 @@ export default defineConfig({
               text: 'python',
               items: [
                 {
-                  text: '基础篇',
+                  text: '第一阶段',
                   link: '/python/'
                 },
                 {
-                  text: '高级篇',
+                  text: '第二阶段',
                   link: '/python/advance'
                 },
                 {
-                  text: '高级篇',
+                  text: '第三阶段',
                   link: '/python/advance'
                 
                 }
