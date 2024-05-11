@@ -57,7 +57,12 @@ export default defineConfig({
           },
           {
             text: 'python',
-            link: '/python/'
+            items:[
+              {
+                text:'基础',
+                link: '/python/'
+              }
+            ]
           }
         ]
       }
