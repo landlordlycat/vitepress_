@@ -1,3 +1,4 @@
+import { text } from 'stream/consumers'
 import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
@@ -60,7 +61,7 @@ export default defineConfig({
             items:[
               {
                 text:'基础',
-                link: '/python/'
+                link: '/python/base/'
               }
             ]
           }
@@ -140,16 +141,17 @@ export default defineConfig({
               items: [
                 {
                   text: '第一阶段',
-                  link: '/python/'
-                },
-                {
+                  link: '/python/base/',
+                  collapsed:true,
+                  items:[
+                    {
+                      text: 'python基础综合案例',
+                      link: '/python/base/python-base-case'
+                    }
+                  ]
+                },{
                   text: '第二阶段',
-                  link: '/python/advance'
-                },
-                {
-                  text: '第三阶段',
-                  link: '/python/advance'
-                
+                  link: '/python/base/python-second-stage'
                 }
               ]
             }
