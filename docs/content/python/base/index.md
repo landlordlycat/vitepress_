@@ -734,7 +734,7 @@ Python中有5种基本的数据容器：
 6. 删除元素：`list_name.remove(value)` 或 `del list_name[index]` 或 `list_name.pop([,index])`
 7. 列表长度：`len(list_name)`
 8. 列表切片：`list_name[start:end:step]`
-
+9. 列表分类：`list_name.sort(key,reverse)` 或 `list_name.reverse()`
 
 ```python
 # 创建列表
@@ -765,6 +765,20 @@ print(len(my_list))  # 6
 # 列表切片
 print(my_list[1:4])  # [2, 3, 4]
 print(my_list[::2])  # [10, 3, 5]
+
+# 列表分类
+my_list = [["a",33],["b",65],["c",11]]
+
+def sort_by_key(item):
+    return item[1]
+
+my_list.sort(key=sort_by_key, reverse=True)
+
+# 也可以用lambda函数 参数为my_list中的元素
+my_list.sort(key=lambda x:x[1], reverse=True)
+
+print(my_list)  # [['b', 65], ['a', 33], ['c', 11]]
+
 ```
 
 ![列表的方法](/assets/python/images/列表的方法.png)
