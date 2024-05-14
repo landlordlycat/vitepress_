@@ -420,9 +420,102 @@ phone.call_by_5g()
 # ITCAST
 ```
 
+### 多态
+
+抽象类的作用：
+>[!important]
+>✅**多用于做顶层设计（设计标准），以便子类做具体实现。**<br>
+>✅**也是对子类的一种软性约束，要求子类必须复写（实现）父类的一些方法**<br>
+>✅**并配合多态使用，获得不同的工作状态。**
+
+> 多态（Polymorphism）是面向对象编程（OOP）的重要概念，是指允许不同类的对象对同一消息作出不同的响应。
+
+多态，指的是：多种状态，即完成某个行为时，使用不同的对象会得到不同的状态。
+
+```python{2,3,6,10}
+class Animal:  # 抽象类 接口
+    def speak(self):  # 抽象方法
+        pass  # 方法体是空实现的(pass)
+
+class Dog(Animal):
+    def speak(self): # 子类具体实现
+        print('wang wang')
+
+class Cat(Animal):
+    def speak(self):  # 子类具体实现
+        print('meow meow')
+
+
+def make_noise(animal: Animal):
+    animal.speak()
+
+dog = Dog()
+cat = Cat()
+
+make_noise(dog)
+make_noise(cat)
+
+# 输出：
+# wang wang
+# meow meow
+```
+
+- 父类用来确定有哪些方法
+- 具体的方法实现，子类自行决定
+
+**_(这种写法，就叫抽象类，也可以称为接口)_**
+
+抽象类相当于一个标准（接口），包含一些抽象的方法，真正的实现需要子类自己去复写。--顶层设计模式
+
+```python
+class AC: # 抽象类 接口
+    def cool_wind(self): # 顶层设计模式 (pass)抽象方法
+        pass
+
+    def hot_wind(self):
+        pass
+
+    def swing_l_l(self):
+        pass
+
+
+class Midea_AC(AC):
+    def cool_wind(self):
+        print('美的冷风')
+
+    def hot_wind(self):
+        print('美的热风')
+
+    def swing_l_l(self):
+        print('美的左侧左摆')
+
+
+class GREE_AC(AC):
+    def cool_wind(self):
+        print('格力冷风')
+
+    def hot_wind(self):
+        print('格力热风')
+
+    def swing_l_l(self):
+        print('格力左侧左摆')
+
+def make_coole(ac:AC):
+    ac.cool_wind()
+
+mide_ac = Midea_AC()
+gree_ac = GREE_AC()
+make_coole(mide_ac)
+make_coole(gree_ac)
+# 输出：
+# 美的冷风
+# 格力冷风
+```
+
 ## 类型注解
 
 ### 变量的类型注解
+
 > 变量的类型注解（Type Annotation）是 Python 3.6 引入的新特性，它允许我们在定义变量时，为其指定类型 类似`typescript`
 
 支持：
@@ -463,6 +556,7 @@ my_set:set[int] = {1, 2, 3}
 # 字典类型需要每一个键-值对都标记出来，第一个是key，第二个是value
 my_dict:dict[str, int] = {"name": 10, "age": 20}
 ```
+
 除了上面的方法，也可以在**注释中**进行类型注解
 `# type:类型`
 
@@ -474,6 +568,7 @@ def func():
   return True
 var_3 = func() # type:bool
 ```
+
 ### 函数(方法)的类型注解
 
 ```python {1}
@@ -486,7 +581,7 @@ def func(data:list):
   data.append(4)
 
 # data:list
-func([1, 2, 3]) 
+func([1, 2, 3])
 
 def add(a:int, b:int)->int:
     return a + b
@@ -497,18 +592,18 @@ add(1, 2) # 3 int
 ### Union 类型
 
 :::tip 补充知识：
-1. `my_list:list[int|str|bool] = [1,2,3,'hello',True]` 这个类型注释在 Python 3.10 及以上的版本中是正确的。Python 3.10 引入了一种新的语法，允许你使用 `| `运算符来表示类型联合，所以` int|str|bool `表示一个整数、字符串或布尔值。
-2. 在 Python 3.10 以下的版本中，你需要使用 Union 来表示类型联合。`from typing import Union` 导入 Union 类型。
-:::
 
+1. `my_list:list[int|str|bool] = [1,2,3,'hello',True]` 这个类型注释在 Python 3.10 及以上的版本中是正确的。Python 3.10 引入了一种新的语法，允许你使用 `| `运算符来表示类型联合，所以`int|str|bool`表示一个整数、字符串或布尔值。
+2. 在 Python 3.10 以下的版本中，你需要使用 Union 来表示类型联合。`from typing import Union` 导入 Union 类型。
+   :::
 
 > Union 类型是 Python 3.10 引入的新特性，它允许我们在类型注解中使用多个类型，表示该变量可以是多个类型中的一种。
 
 联合类型：
 
-`Union[类型1, 类型2, ...]` # 多个类型之间用逗号分隔，类似于ts里面的`|`，`type u = number | string;`
+`Union[类型1, 类型2, ...]` # 多个类型之间用逗号分隔，类似于 ts 里面的`|`，`type u = number | string;`
 
-Union联合类型注解，在**变量注解、函数（方法）形参和返回值注解中**，均可使用。
+Union 联合类型注解，在**变量注解、函数（方法）形参和返回值注解中**，均可使用。
 
 ```python
 # Union类型，必须导包
@@ -527,5 +622,178 @@ def func(data: list|tuple) -> int|str: # [!code ++]
   return len(data) # type -> int
 
 ```
-
 推荐使用 3.10 及以上版本的`|`语法，更加简洁。
+
+
+## 综合案例
+
+![综合案例-需求分析](/assets/python/images/综合案例-需求分析.png)
+
+:::code-group
+
+```python[main.py]
+from data_define import Record
+from file_define import *
+from pyecharts.charts import Bar
+from pyecharts.options import *
+from pyecharts.globals import ThemeType
+
+text_file_reader = TextFileReader('2011年1月销售数据.txt')
+json_file_reader = JsonFileReader('2011年2月销售数据JSON.txt')
+
+january_data:list[Record] = text_file_reader.read_data()
+february_data:list[Record] = json_file_reader.read_data()
+
+all_data:list[Record] = january_data + february_data
+
+data_dict = {}
+# [{data:'2021',order_id:'123456',price:'10000',province:'gd},{data:'2021',order_id:'123456',price:'10000',province:'gd}]
+for item in all_data:
+    if item.date in data_dict:
+        data_dict[item.date] += item.money
+    else:
+        data_dict[item.date] = item.money
+
+bar = Bar(init_opts=InitOpts(theme=ThemeType.LIGHT))
+
+bar.add_xaxis(list(data_dict.keys())).add_yaxis("销售金额",list(data_dict.values()),label_opts=LabelOpts(is_show=False)).set_global_opts(title_opts=TitleOpts(is_show=True,title="每日销售金额"))
+
+bar.render('每日销售金额.html')
+```
+
+```python[data_define.py]
+"""
+数据定义的类
+"""
+
+class Record:
+    def __init__(self, date, order_id, money, province):
+        self.date = date
+        self.order_id = order_id
+        self.money = money
+        self.province = province
+
+    def __str__(self): # 重写__str__方法，方便打印对象 魔术方法
+        return f"{self.date}, {self.order_id}, {self.money}, {self.province}"
+```
+
+```python[file_define.py]{7,12,15,25,28}
+"""
+文件相关的类定义
+"""
+from data_define import Record
+import json
+
+class FileReader: # 抽象类
+    def read_data(self) -> list[Record]:
+        pass
+
+class TextFileReader(FileReader):
+    def __init__(self, file_path: str): # 构造函数
+        self.file_path = file_path
+
+    def read_data(self) -> list[Record]: # 复写父类方法
+        record_list: list[Record] = []
+        with open(self.file_path, 'r', encoding='utf-8') as file:
+            for line in file.readlines():
+                line = line.strip()
+                [date, order_id, money, province] = line.split(',')
+                record_list.append(Record(date, order_id, int(money), province))
+        return record_list
+
+class JsonFileReader(FileReader):
+    def __init__(self, file_path: str):  # 构造函数
+        self.file_path = file_path
+
+    def read_data(self) -> list[Record]:  # 多态 复写父类方法
+        record_list: list[Record] = []
+        with open(self.file_path, 'r', encoding='utf-8') as file:
+            for line in file.readlines():
+               data_dict = json.loads(line)
+               record_list.append(Record(data_dict['date'], data_dict['order_id'], int(data_dict['money']), data_dict['province']))
+        return record_list
+
+
+if __name__ == '__main__':
+    text_file_reader = TextFileReader('2011年1月销售数据.txt')
+    for i in text_file_reader.read_data():
+        print(i)
+```
+:::
+
+## SQL
+
+[跳转·mysql基础](/database/mysql/)
+
+
+### python操作mysql
+
+除了使用图形化工具以外，我们也可以使用编程语言来执行SQL从而操作数据库。
+
+在Python中，使用第三方库：`pymysql`来完成对MySQL数据库的操作。[^官方文档]
+
+[^官方文档]: https://pymysql.readthedocs.io/en/latest/modules/connections.html
+
+安装：`pip install pymysql`
+
+```python
+from pymysql import Connection
+# Connect to the database
+mysql = Connection(
+    host='127.0.0.1',
+    user='root',
+    password='********',
+    autocommit=True, # 自动提交事务 需要自行配置
+)
+
+# cursor
+cursor = mysql.cursor() # 获取游标
+
+# execute SQL
+mysql.select_db('itcast') # 选择数据库
+count = cursor.execute("select * from account") # 执行SQL语句，返回影响的行数
+
+# 表结构
+
+# | name|money |java|
+
+
+cursor.execute('insert into account(name,money,java) values ("李四",15000,90),("王五|20000|90|")')
+
+mysql.commit() # 提交事务 默认未自动提交，所以需要手动提交
+
+# fetch data
+
+result =cursor.fetchall() # 获取全部数据
+
+# print result
+
+for r in result:
+    print(r)
+
+mysql.close()
+```
+
+### 案例
+
+数据库名：`py_sql`
+
+```sql
+create table orders(
+    id int primary key auto_increment,
+    order_date DATE not null comment '订单日期',
+    order_id varchar(255) not null comment '订单号',
+    money int not null comment '金额',
+    province varchar(255) not null comment '省份'
+) comment '订单表';
+```
+
+```python
+for item in all_data:
+    # insert into orders(order_date, order_id, money, province) values('2021-01-01', '123456', 10000, 'gd')
+    sql = f"insert into orders(order_date, order_id, money, province) values({item.date}, '{item.order_id}', {item.money}, '{item.province}')"
+    cursor.execute(sql)
+
+mysql.commit() # 提交事务 如果没有自动提交，需要手动提交
+mysql.close()
+```

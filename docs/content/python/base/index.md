@@ -199,6 +199,38 @@ else:
     print("你还未成年，请在成年后再来！")
 
 ```
+## match语句
+
+> 类似switch语句，可以根据条件表达式的值，执行对应的代码块。
+
+match语句是在 Python 3.10 版本中新引入的结构称为“模式匹配”，这是一个被用作语言结构的新式 switch 语句。
+
+
+```python
+match 变量:
+    case 值1:
+        语句块1
+    case 值2:
+        语句块2
+    case 值3:
+        语句块3
+    case _:
+        语句块4
+
+def http_status(status):
+    match status:
+        case 200:
+            return "OK"
+        case 404:
+            return "Not Found"
+        case 418:
+            return "I'm a teapot"
+        case _: # 默认情况 _
+            return "Something's wrong with the internet"
+
+print(http_status(200))  # 输出 'OK'
+```
+在以上代码中，match 将 `status` 变量与每个 `case` 中的值进行比较，如果存在匹配则执行对应的块。最后的 `case _` 是一个默认情况，如果之前的值都不符合，则会执行它。
 
 ## while循环的基础应用
 

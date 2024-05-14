@@ -153,6 +153,10 @@ export default defineConfig({
                 },{
                   text: '第二阶段',
                   link: '/python/base/python-second-stage'
+                },
+                {
+                  text: '第三阶段',
+                  link: '/python/base/python-third-stage'
                 }
               ]
             }
