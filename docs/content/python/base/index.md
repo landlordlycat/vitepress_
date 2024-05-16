@@ -5,8 +5,6 @@ outline: deep
 
 # Python
 
-推导式 - 三元表达式
-
 ## 字面量
 
 ![数据类型](/assets/python/images/数据类型.png)

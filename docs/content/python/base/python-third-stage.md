@@ -465,6 +465,24 @@ print(times5(10))  # 输出: 50
 ### 装饰器
 
 > 装饰器（Decorator）是 Python 高阶函数的一种应用，它能在不改变函数源代码的前提下，动态地给函数增加功能。
+```python
+def my_decorator(func):
+    def hello():
+        print("Hello, World!")
+        func()
+    return hello
+
+def say_hello():
+    print("Hello, Python!")
+
+
+say_hello = my_decorator(say_hello) # hell()
+
+say_hello() 
+# Hello, World!
+# Hello, Python!
+```
+
 
 ```python
 def my_decorator(func):

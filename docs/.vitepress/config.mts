@@ -61,9 +61,13 @@ export default defineConfig({
             text: 'python',
             items:[
               {
-                text:'基础',
+                text:'基础篇',
                 link: '/python/base/'
+              },{
+                text:'进阶篇',
+                link: '/python/advance/'
               }
+              
             ]
           }
         ]
@@ -138,7 +142,7 @@ export default defineConfig({
           items: [
             {
               collapsed: true,
-              text: 'python',
+              text: '基础篇',
               items: [
                 {
                   text: '第一阶段',
@@ -157,6 +161,15 @@ export default defineConfig({
                 {
                   text: '第三阶段',
                   link: '/python/base/python-third-stage'
+                }
+              ]
+            },{
+              text: '进阶篇',
+              link: '/python/advance/',
+              collapsed:true,
+              items:[
+                {
+                  
                 }
               ]
             }
