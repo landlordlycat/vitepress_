@@ -376,3 +376,169 @@ gen = my_generator()
 for i in gen:
     print(i)
 ```
+
+
+## 运算符
+---
+### 算术运算符
+
+优先级：
+
+| 运算符 | 优先级 |
+|---|---|
+|**|幂|
+|* / // %| 乘 除 取整 取模|
+|+ - | 加 减|
+
+### 比较运算符
+
+> 判断两个操作数的关系，并返回一个布尔值。
+
+```python
+5 > 3  # True
+```
+
+### 逻辑运算符
+
+优先级: `not > and > or`
+
+|运算符|逻辑表达式|描述|
+|---|---|---|
+|not|not x|布尔“非” 如果x为True，返回False；如果x为False，返回True|
+|and|x and y|布尔“与” 只有x和y都为真，才返回True|
+|or|x or y|布尔“或” 只要x或y有一个为真，就返回True|
+
+```python
+1 and 0  # 0
+1 or 0  # 1
+not 1  # False
+```
+
+### 位运算符
+
+|运算符|描述|功能|实列|
+|---|----|----|----|
+|`&`|按位与|对二进制位进行逻辑“与”运算，只有两个相应位都为1时，结果才为1，否则为0|a = 60, b = 13; c = a & b; print(c) # 12|
+|`\|`|按位或|对二进制位进行逻辑“或”运算，只要两个相应位有一个为1时，结果就为1，否则为0|a = 60, b = 13; c = a | b; print(c) # 61|
+|`^`|按位异或|对二进制位进行逻辑“异或”运算，当两个相应位相异时，结果为1，否则为0|a = 60, b = 13; c = a ^ b; print(c) # 49|
+|`~`|按位取反|对二进制位进行逻辑“取反”运算，即把1变为0，把0变为1，~x 类似于 -x - 1|a = 60; b = ~a; print(b) # -61|
+|`<<`|左移|将数字的二进制表示向左移动指定的位数|a = 60; b = a << 2; print(b) # 240|
+|`>>`|右移|将数字的二进制表示向右移动指定的位数|a = 60; b = a >> 2; print(b) # 15|
+
+### 成员运算符
+
+1. 语法：`in`和`not in`
+
+2. 作用：判断对象是否在序列中。
+
+3. 示例：
+
+```python
+a = [1, 2, 3]
+print(1 in a)  # True
+print(4 not in a)  # True
+```
+
+
+### 身份运算符
+
+1. 语法：`is`和`is not`
+
+2. 作用：比较两个标识符是否引用同一个对象。
+
+3. 示例：
+
+```python
+a = 10
+b = 10
+print(a is b)  # True
+
+
+c = [1, 2, 3]
+d = [1, 2, 3]
+print(c is d)  # False
+```
+## raise语句
+
+> raise语句用于抛出一个指定的异常。
+
+```python
+raise Exception('Error message')
+```
+
+## zip 
+
+1. 语法：`zip(iterable, iterable,...)`
+
+2. 作用：将多个迭代器（序列、集合、字典等）组合成一个迭代器，返回一个元组。
+
+3. 示例：
+
+```python
+a = [1, 2, 3]
+b = [4, 5, 6]
+c = [7, 8, 9]
+
+
+for i in zip(a, b, c):
+    print(i)
+
+
+# 输出结果：
+# (1, 4, 7)
+# (2, 5, 8)
+# (3, 6, 9)
+```
+
+## 内置函数
+
+map 、filter 、reduce
+
+### map
+
+> map() 函数接收两个参数，一个是函数，一个是Iterable，map将传入的函数依次作用到序列的每个元素，并把结果作为新的Iterator返回。
+
+```python
+def square(x):
+    return x ** 2
+
+
+numbers = [1, 2, 3, 4, 5]
+result = map(square, numbers)
+print(list(result))  # [1, 4, 9, 16, 25]
+```
+
+### filter
+
+> filter() 函数接收两个参数，一个是函数，一个是Iterable，filter() 函数用于过滤序列，过滤掉不符合条件的元素，返回一个Iterator。
+
+```python
+def is_odd(x):
+    return x % 2 == 1
+
+
+numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+result = filter(is_odd, numbers)
+print(list(result))  # [1, 3, 5, 7, 9]
+```
+
+### reduce
+
+> reduce() 函数接收两个参数，一个是函数，一个是Iterable，reduce() 函数用于对序列进行归约操作，即：
+
+```python
+reduce(f, [x1, x2, x3, x4]) = f(f(f(x1, x2), x3), x4)
+```
+
+
+```python
+from functools import reduce
+
+def add(x, y):
+    return x + y
+
+
+numbers = [1, 2, 3, 4, 5]
+result = reduce(add, numbers)
+print(result)  # 15
+``` 
