@@ -342,40 +342,6 @@ print(Person.is_adult(17))  # False
 - 当你需要访问类属性或者类方法时，应使用classmethod。相反，如果在方法内部不需要访问任何类属性或方法，可以使用staticmethod。
 :::
 
-## yield关键字
-
-> yield关键字是Python中的一个关键字，它被用来生成一个生成器。
-
-生成器是一种特殊的迭代器，它可以暂停函数的执行，并在适当的时候恢复。
-
-生成器的优点：
-
-- 节省内存：生成器不会一次性生成所有结果，而是每次只生成一个结果，并在需要时返回。
-- 迭代器协议：生成器可以被用于迭代器协议，可以被用于for循环、list、tuple、dict等。
-- 延迟计算：生成器可以延迟计算，只有在需要时才生成结果，可以节省内存和提高效率。
-
-1. 语法：`yield`
-
-2. 作用：生成器函数会返回一个生成器对象，该对象可以迭代。
-
-3. 示例：
-
-
-```python
-def my_generator():
-    for i in range(10):
-
-        # 这里可以做一些耗时的计算
-        # 等到需要时才生成结果
-        yield i*i
-
-# 调用生成器函数
-gen = my_generator()
-
-# 迭代生成器
-for i in gen:
-    print(i)
-```
 
 
 ## 运算符
@@ -466,29 +432,6 @@ print(c is d)  # False
 raise Exception('Error message')
 ```
 
-## zip 
-
-1. 语法：`zip(iterable, iterable,...)`
-
-2. 作用：将多个迭代器（序列、集合、字典等）组合成一个迭代器，返回一个元组。
-
-3. 示例：
-
-```python
-a = [1, 2, 3]
-b = [4, 5, 6]
-c = [7, 8, 9]
-
-
-for i in zip(a, b, c):
-    print(i)
-
-
-# 输出结果：
-# (1, 4, 7)
-# (2, 5, 8)
-# (3, 6, 9)
-```
 
 ## 内置函数
 
@@ -524,6 +467,7 @@ print(list(result))  # [1, 3, 5, 7, 9]
 
 ### reduce
 
+
 > reduce() 函数接收两个参数，一个是函数，一个是Iterable，reduce() 函数用于对序列进行归约操作，即：
 
 ```python
@@ -541,4 +485,135 @@ def add(x, y):
 numbers = [1, 2, 3, 4, 5]
 result = reduce(add, numbers)
 print(result)  # 15
+
+my_rd = reduce(lambda x, y: x + y, [1, 2, 3])
+print(my_rd)
 ``` 
+### sorted
+
+> sorted() 函数接收一个可迭代对象，并返回一个新的排序后的列表。
+
+```python
+my_st = sorted([1, 5, 3])
+print(my_st)
+# [1, 3, 5]
+my_st = sorted([1, 5, 3], reverse=True)
+print(my_st)
+# [5, 3, 1] 
+
+test_list = ["test_mi_001","test_ki_012","test_go_008","test_lt_003"]
+
+print(sorted(test_list,key=lambda x:x.split('_')[2],reverse=False))
+# ['test_mi_001', 'test_lt_003', 'test_go_008', 'test_ki_012']
+print(sorted(test_list,key=lambda x:re.findall(r"\d+",x),reverse=False))
+```
+>[!important]
+>`sort` 和 `sorted` 的区别，一个对原列表排序，一个返回一个新的排序后的列表。
+
+维护一个排序序列，建议使用Python 的标准库 `bisect`来做，它是采用二分查找算法，性能较高。
+
+### zip
+
+> zip() 函数用于将可迭代的对象作为参数，将对象中对应的元素打包成一个个元组，然后返回由这些元组组成的列表。
+
+```python
+a = [1,2,3]
+b = [4,5,6]
+
+c = zip(a,b) # c是一个迭代器对象
+print(list(c))
+# [(1, 4), (2, 5), (3, 6)]
+```
+
+
+## 迭代器
+
+一个类只要实现了魔法函数 `__iter__` 就是可迭代的（Iterable），但是它还不是迭代器(Iterator)
+
+:::tip
+节省资源消耗，迭代器并不会计算每一项的值，它只在你访问这些项的时候才计算，也就是说它保存的是一种计算方法，而不是计算的结果
+
+迭代器就是使对象可以进行 for 循环，它需要实现 `__iter__` 和 `__next__` 两个魔法函数。
+:::
+
+1. 语法：`iter(object)`
+
+2. 作用：将一个可迭代对象转换为迭代器。
+
+3. 示例：
+
+```python
+a = [1, 2, 3]
+b = iter(a)
+print(next(b))  # 1
+print(next(b))  # 2
+print(next(b))  # 3
+```
+
+## 生成器
+
+生成器是一种特殊的迭代器，它可以暂停函数的执行，并在适当的时候恢复。
+
+生成器的优点：
+
+- 节省内存：生成器不会一次性生成所有结果，而是每次只生成一个结果，并在需要时返回。
+- 迭代器协议：生成器可以被用于迭代器协议，可以被用于for循环、list、tuple、dict等。
+- 延迟计算：生成器可以延迟计算，只有在需要时才生成结果，可以节省内存和提高效率。
+
+1. 语法：`yield`
+
+2. 作用：生成器函数会返回一个生成器对象，该对象可以迭代。
+
+3. 示例：
+
+```python
+my_gen = (i for i in range(10))
+
+
+print(next(my_gen))
+print(next(my_gen))
+print(next(my_gen))
+print(next(my_gen))
+```
+前面讲的好多对象都是在类里面定义的，而生成器对象就不是在类里面了，而是在函数里面定义，在一个函数里面只要出现了 `yield` 它就不是普通函数，而是一个生成器。
+
+```python
+def my_gen():
+    print("setp 1")
+    yield 1
+    print("setp 2")
+    yield 2
+
+g = my_gen()
+next(g)
+next(g)
+```
+`yield` 的用途是让函数暂停，并保存对象状态在内存中，下次再使用 `next` 调用同一个对象时，又开始从之前暂停的位置开始执行，直到运行到下一个 `yield` 又暂停，如果后面没有 `yield`了，则会抛 `StopIteration` 异常。
+
+`yield` 和 `return` 都能返回数据，但是有区别，return 语句之后的代码是不执行的，而 `yield` 后面还可以执行。
+
+```python
+def my_gen():
+    yield 1
+    yield 2
+    return 3
+
+for i in my_gen():
+    print(i)
+
+# 输出结果：
+# 1
+# 2
+```
+`return` 后面的值并没有返回
+
+## 总结
+
+- 迭代器需要实现两个魔法函数：`__iter__` 和 `__next__` ；
+
+- 迭代器允许惰性求值，只有在请求下一个元素时迭代器对象才会去生成它，它保存的是一种生成数据的方法；
+
+- 生成器是迭代器的一种更 Pythonic 的写法，可以在函数里面用 `yield` 创建一个迭代器；
+
+- 生成器表达式是生成器的一种更加 Pythonic 的写法。
+
